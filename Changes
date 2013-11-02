@@ -1,0 +1,60 @@
+Revision history for Net-IPAddress-Util
+
+3.000   2013-11-01
+        Back to proper CPAN-friendly version numbers
+
+1.500   2013-10-31
+        Attempt to backport the 2.x speedups and fixes into a non-mop env.
+
+1.002   2012-06-09
+        Make it explicit that 5.010 is required. Start trying to make the
+        time trials smarter.
+
+1.001   2012-05-31
+        Try advancing some of the deps to see if that cures the spurious
+        test fails on what look like random architectures. This is unrelated
+        to the previous GMP / Pari stuff, and might be BigInt version related.
+
+1.000   2012-05-24
+        Move from ISA BigInt to HASA BigInt to try to solve the GMP / Pari
+        stuff once and for all.
+
+0.12    2011-03-26
+        Fix completely idiotic thinko in handling backend specification.
+
+0.11    2011-03-26
+        Try to solve weird issue with certain binary versions of GMP and Pari.
+
+0.10    2010-04-28
+        Fewer internal dependencies means fewer chances to use the wrong lib.
+
+0.09    2010-03-27
+        Try to be even more bullet-proof wrt the N32 bugs.
+
+0.08    2010-03-25
+        Add hopefully more-useful output to the diagnostic tests
+
+0.07    2010-03-25
+        Add more purely-diagnostic tests.
+        Hopefully fix weird $PROMOTE_N32 and ->as_n32() bug on Windows and BSD.
+
+0.06    2010-03-22
+        Add $PROMOTE_N32 and ->as_n32().
+        Hopefully fix a weird bug on *BSD systems.
+        Now at 76.2% coverage.
+
+0.05    2010-03-22
+        Make compatability API test better at surviving lack of Net::IPAddress
+
+0.04    2010-03-21
+        Added more tests for compatibility API. Now at 75.9% coverage.
+
+0.03    2010-03-21
+        Added tests for compatibility API.
+
+0.02    2010-03-21
+        Fixed bugs in ip2num() and num2ip(). Fixed distro name in Changes file.
+
+0.01    2010-03-21
+        First version, released on an unsuspecting world.
+

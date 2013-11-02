@@ -1,4 +1,4 @@
-Net-IPAddress-Util-backport
-===========================
+Net-IPAddress-Util
+==================
 
-Backport of BigInt removal and speed / stability hacks from 2.x series to a non-mop version
+Version-agnostic representation of an IP address in Perl
