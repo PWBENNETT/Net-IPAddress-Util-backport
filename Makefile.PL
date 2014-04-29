@@ -18,7 +18,7 @@ WriteMakefile(
         'Time::HiRes' => '0',
         'List::MoreUtils' => '0',
     },
-    MIN_PERL_VERSION => '5.008008',
+    MIN_PERL_VERSION => '5.010000',
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Net-IPAddress-Util-*' },
 );

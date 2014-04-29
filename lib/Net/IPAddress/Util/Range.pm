@@ -1,6 +1,6 @@
 package Net::IPAddress::Util::Range;
 
-use 5.0008008;
+use 5.010000;
 use strict;
 use warnings;
 use overload (

@@ -1,6 +1,6 @@
 package Net::IPAddress::Util::Collection;
 
-use 5.008008;
+use 5.010000;
 use strict;
 use warnings;
 

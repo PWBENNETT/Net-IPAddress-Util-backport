@@ -1,6 +1,6 @@
 package Net::IPAddress::Util;
 
-use 5.0008008;
+use 5.010000;
 use strict;
 use warnings;
 use overload (
@@ -42,7 +42,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.000';
+our $VERSION = '3.001';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
