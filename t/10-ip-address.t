@@ -98,9 +98,21 @@ $Net::IPAddress::Util::DIE_ON_ERROR = 1;
     is(scalar(@{$compacted}), 1, "Large-range collection from tight, compacted");
     my $coll_t = $compacted->tight();
     is(scalar(@{$coll_t}), 9, "Round and round we go...");
-    is(scalar($coll_t->as_ranges()), 9, "Round and round we go... (as ranges)");
-    is(scalar($coll_t->as_cidrs()), 9, "Round and round we go... (as cidrs)");
-    is(scalar($coll_t->as_netmasks()), 9, "Round and round we go... (as netmasks)");
+    is(
+        (join ', ', $coll_t->as_ranges),
+        '(192.168.0.3 .. 192.168.0.3), (192.168.0.4 .. 192.168.0.7), (192.168.0.8 .. 192.168.0.15), (192.168.0.16 .. 192.168.0.31), (192.168.0.32 .. 192.168.0.63), (192.168.0.64 .. 192.168.0.95), (192.168.0.96 .. 192.168.0.111), (192.168.0.112 .. 192.168.0.119), (192.168.0.120 .. 192.168.0.123)',
+        "Round and round we go... (as ranges)"
+    );
+    is(
+        (join ', ', $coll_t->as_cidrs),
+        '192.168.0.3/32, 192.168.0.4/30, 192.168.0.8/29, 192.168.0.16/28, 192.168.0.32/27, 192.168.0.64/27, 192.168.0.96/28, 192.168.0.112/29, 192.168.0.120/30',
+        "Round and round we go... (as cidrs)"
+    );
+    is(
+        (join ', ', $coll_t->as_netmasks),
+        '192.168.0.3 (255.255.255.255), 192.168.0.4 (255.255.255.252), 192.168.0.8 (255.255.255.248), 192.168.0.16 (255.255.255.240), 192.168.0.32 (255.255.255.224), 192.168.0.64 (255.255.255.224), 192.168.0.96 (255.255.255.240), 192.168.0.112 (255.255.255.248), 192.168.0.120 (255.255.255.252)',
+        "Round and round we go... (as netmasks)"
+    );
 }
 
 {
