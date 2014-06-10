@@ -1,8 +1,8 @@
 package Net::IPAddress::Util::Range;
 
-use 5.010000;
-use strict;
-use warnings;
+use 5.012000;
+use utf8;
+
 use overload (
     '""' => 'as_string',
     '<=>' => 'spaceship',
@@ -156,6 +156,16 @@ sub tight {
         push @$rv, @{$remainder->tight()};
     }
     return $rv;
+}
+
+sub lower {
+    my $self = shift;
+    return $self->{ lower };
+}
+
+sub upper {
+    my $self = shift;
+    return $self->{ upper };
 }
 
 1;

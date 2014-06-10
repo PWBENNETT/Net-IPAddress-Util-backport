@@ -1,8 +1,8 @@
 package Net::IPAddress::Util;
 
-use 5.010000;
-use strict;
-use warnings;
+use 5.012000;
+use utf8;
+
 use overload (
     '=' => 'new',
     '""' => 'str',
@@ -42,7 +42,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.001';
+our $VERSION = '3.002';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -57,7 +57,7 @@ sub new {
         $normal = $address;
     }
     elsif (ref($address) eq 'ARRAY' && @$address == 4) {
-        $normal = [ unpack 'C16', pack 'N4', @$address ];
+        $normal = [ unpack 'U16', pack 'N4', @$address ];
     }
     elsif (ref $address and eval { $address->isa(__PACKAGE__) }) {
         return bless { address => $address->{ address } } => $class;
@@ -75,7 +75,7 @@ sub new {
             0, 0, 0, 0,
             0, 0, 0, 0,
             0, 0, 0xff, 0xff,
-            unpack('C4', pack('N', $address))
+            unpack('U4', pack('N', $address))
         ];
     }
     elsif ($address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi) {
@@ -108,13 +108,13 @@ sub new {
 
 sub is_ipv4 {
     my $self = shift;
-    my @octets = unpack 'C16', $self->{ address };
+    my @octets = unpack 'U16', $self->{ address };
     return $octets[ 10 ] == 0xff && $octets[ 11 ] == 0xff && (!grep { $_ } @octets[ 0 .. 9 ]);
 }
 
 sub ipv4 {
     my $self = shift;
-    return join '.', unpack 'C4', substr($self->{ address }, -4);
+    return join '.', unpack 'U4', substr($self->{ address }, -4);
 }
 
 sub as_n32 {
@@ -124,7 +124,7 @@ sub as_n32 {
 
 sub normal_form {
     my $self = shift;
-    my $hex = join('', map { sprintf('%02x', $_) } unpack('C16', $self->{ address }));
+    my $hex = join('', map { sprintf('%02x', $_) } unpack('U16', $self->{ address }));
     $hex = substr(('0' x 32) . $hex, -32);
     return lc $hex;
 }
@@ -231,7 +231,7 @@ sub _shift_left {
     my $self = shift;
     my ($rhs, $swapped) = @_;
     my ($pow, $mask) = $self->_pow_mask;
-    my @l = reverse unpack('C16', $self->{ address });
+    my @l = reverse unpack('U16', $self->{ address });
     my @rv;
     for my $octet (0 .. 15) {
         $rv[$octet] += $l[$octet] << $rhs;
@@ -249,7 +249,7 @@ sub _shift_right {
     my $self = shift;
     my ($rhs, $swapped) = @_;
     my ($pow, $mask) = $self->_pow_mask;
-    my @l = unpack('C16', $self->{ address });
+    my @l = unpack('U16', $self->{ address });
     my @rv;
     for my $octet (0 .. 15) {
         $rv[$octet] += $l[$octet] >> $rhs;
@@ -260,7 +260,7 @@ sub _shift_right {
             $rv[$octet + 1] += $lsb if $octet < 15;
         }
     }
-    @rv = $self->_mask_out($pow, $mask, unpack('C16', pack('N4', @rv)));
+    @rv = $self->_mask_out($pow, $mask, unpack('U16', pack('N4', @rv)));
     return Net::IPAddress::Util->new(\@rv);
 }
 
@@ -302,7 +302,7 @@ sub _bor {
 
 sub _neg {
     my $self = shift;
-    my @n = unpack('C16', $self->{ address });
+    my @n = unpack('U16', $self->{ address });
     my ($pow, $mask) = $self->_pow_mask;
     my @rv = map { 255 - $_ } @n;
     return Net::IPAddress::Util->new(\@rv);
@@ -382,7 +382,7 @@ sub explode_ip {
 }
 
 sub implode_ip {
-    return Net::IPAddress::Util->new([ unpack 'C16', pack 'B128', join '', map { split // } @_ ]);
+    return Net::IPAddress::Util->new([ unpack 'U16', pack 'B128', join '', map { split // } @_ ]);
 }
 
 sub n32_to_ipv4 { IP(@_) }
@@ -402,7 +402,7 @@ sub radix_sort (\@) {
     # In theory, a radix sort is O(N), which beats Perl's O(N log N) by
     # a fair margin. However, it _does_ discard duplicates, so ymmv.
     my $array = shift;
-    my $from = [ map { [ unpack 'C16', $_->{ address } ] } @$array ];
+    my $from = [ map { [ unpack 'U16', $_->{ address } ] } @$array ];
     my $to;
     for (my $i = 15; $i >= 0; $i--) {
         $to = [];
@@ -411,7 +411,7 @@ sub radix_sort (\@) {
         }
         $from = [ map { @{$_ // []} } @$to ];
     }
-    my @rv = map { IP(pack 'C16', @$_) } @$from;
+    my @rv = map { IP(pack 'U16', @$_) } @$from;
     return @rv;
 }
 
