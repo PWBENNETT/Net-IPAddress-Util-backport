@@ -37,12 +37,12 @@ sub sorted {
         my $x = Net::IPAddress::Util::Range->new({ lower => $l, upper => $r });
         $x;
     } @$from;
-    return @rv;
+    return $self->new(@rv);
 }
 
 sub compacted {
     my $self = shift;
-    my @sorted = $self->sorted();
+    my @sorted = @{$self->sorted()};
     my @compacted;
     my $elem;
     while ($elem = shift @sorted) {
