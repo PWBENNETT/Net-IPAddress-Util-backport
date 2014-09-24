@@ -4,7 +4,7 @@
       "Paul Bennett <paul.w.bennett@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "ExtUtils::MakeMaker version 6.98, CPAN::Meta::Converter version 2.140640",
+   "generated_by" : "ExtUtils::MakeMaker version 6.98, CPAN::Meta::Converter version 2.141520",
    "license" : [
       "perl_5"
    ],
@@ -35,7 +35,7 @@
             "Carp" : "0",
             "Exporter" : "0",
             "List::MoreUtils" : "0",
-            "Test::LectroTest" : "0",
+            "Math::BigInt" : "0",
             "Test::More" : "0",
             "Time::HiRes" : "0",
             "perl" : "5.012000"
@@ -43,5 +43,5 @@
       }
    },
    "release_status" : "stable",
-   "version" : "3.003"
+   "version" : "3.010"
 }

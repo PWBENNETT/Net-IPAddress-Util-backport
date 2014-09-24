@@ -17,7 +17,7 @@ WriteMakefile(
         'Test::More'   => '0',
         'Time::HiRes' => '0',
         'List::MoreUtils' => '0',
-        'Test::LectroTest' => '0',
+        'Math::BigInt' => '0',
     },
     MIN_PERL_VERSION => '5.012000',
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },

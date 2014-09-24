@@ -2,6 +2,7 @@ package Net::IPAddress::Util;
 
 use 5.012000;
 use utf8;
+no diagnostics;
 
 use overload (
     '=' => 'new',
@@ -42,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.003';
+our $VERSION = '3.010';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -120,6 +121,24 @@ sub ipv4 {
 sub as_n32 {
     my $self = shift;
     return unpack 'N', substr($self->{ address }, -4);
+}
+
+sub as_n128 {
+    my $self = shift;
+    my $rv;
+    {
+        eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
+        Math::BigInt->import(try => 'GMP,Pari,Calc');
+        my $accum = Math::BigInt->new('0');
+        my $factor = Math::BigInt->new('1')->blsft(Math::BigInt->new('32'));
+        for my $i (map { $_ * 4 } 0 .. 3) {
+            $accum->bmul($factor);
+            $accum->badd(Math::BigInt->new('' . unpack 'N32', substr($self->{ address }, $i, 4)));
+        }
+        $rv = "$accum";
+        no Math::BigInt;
+    }
+    return $rv;
 }
 
 sub normal_form {
