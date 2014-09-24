@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.010';
+our $VERSION = '3.011';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -484,7 +484,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 2.000
+Version 3.011
 
 =head1 SYNOPSIS
 
@@ -653,6 +653,11 @@ not an IPv4 address, for instance '192.168.0.1'.
 Returns the "N32" representation of this object (that is, a 32-bit number in
 network order) if this object represents an IPv4 address, or an error if it
 does not.
+
+=head2 as_n128
+
+Returns the "N128" representation of this object (that is, a 128-bit number in
+network order).
 
 =head2 ipv6
 
