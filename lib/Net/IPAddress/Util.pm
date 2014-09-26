@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.011';
+our $VERSION = '3.012';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -125,6 +125,7 @@ sub as_n32 {
 
 sub as_n128 {
     my $self = shift;
+    my ($keep) = @_;
     my $rv;
     {
         eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
@@ -135,8 +136,8 @@ sub as_n128 {
             $accum->bmul($factor);
             $accum->badd(Math::BigInt->new('' . unpack 'N32', substr($self->{ address }, $i, 4)));
         }
-        $rv = "$accum";
-        no Math::BigInt;
+        $rv = $keep ? $accum : "$accum";
+        no Math::BigInt unless $keep;
     }
     return $rv;
 }
@@ -171,6 +172,10 @@ sub ipv6 {
     $rv =~ s/^:/::/;
     return $rv;
 }
+
+sub as_str { return str(@_); }
+
+sub as_string { return str(@_); }
 
 sub str {
     my $self = shift;
@@ -484,7 +489,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.011
+Version 3.012
 
 =head1 SYNOPSIS
 
@@ -560,10 +565,16 @@ length.
 Given an array of objects, sorts them in ascending order, faster than Perl's
 built-in sort command.
 
-Note that this may only be faster for sufficiently large arrays, due to the
-overhead involved in setting up the radix sort.
+For those who understand the math, a radix sort is C<O(N)> instead of C<O(N
+log N)> (the speed of Perl's builtin sort()), but it I<does> discard
+duplicates, so ymmv. B<There are also (rare) corner cases> in which radix_sort()
+can chew up so much RAM that it causes paging / swapping, which I<will> slow
+down the process I<dramatically>.
 
-Note also that radix_sort() discards duplicate addresses.
+Also note that this particular radix sort implementation is technically kinda
+C<O(48 * N)> (even though one would normally ignore a simple multiplier factor),
+so the break even point is actually nice and low (something close to 4 or more
+addresses) for it to be worth the setup and teardown costs associated.
 
 =head1 COMPATIBILITY API
 
@@ -601,8 +612,6 @@ Net::IPAddress::Util::Range or Net::IPAddress::Util::Collection modules.
 
 Exports radix_sort(). You only need this if you're dealing with very large
 arrays of Net::IPAddress::Util objects, and runtime is of critical concern.
-Even then, you should profile before optimizing -- radix_sort() can be very
-much slower, instead of very much faster, under the wrong circumstances.
 
 =head2 :compat
 
@@ -659,6 +668,16 @@ does not.
 Returns the "N128" representation of this object (that is, a 128-bit number in
 network order).
 
+You may supply one optional argument. If this argument is true, the return
+value will be a Math::BigInt object (allowing quickish and easy math involving
+two such return values), otherwise (if it is false (the default)), then the N128
+number will be returned as a bare string. If your platform can handle math with
+unsigned 128-bit integers, or if you will not be doing math on the results,
+then I strongly recommend the latter (default / false) option for performance
+reasons. In the true-argument case, you're advised to stringify the Math::BigInt
+math results as soon as is practical for performance reasons -- Math::BigInt is
+not "CPU free".
+
 =head2 ipv6
 
 Returns the canonical IPv6 string representation of this object, for
@@ -679,6 +698,10 @@ or for other purposes where easy, fast sorting is desirable, for instance
 =head2 '""'
 
 =head2 str
+
+=head2 to_str
+
+=head2 to_string
 
 If this object is an IPv4 address, it stringifies to the result of C<ipv4>,
 else it stringifies to the result of C<ipv6>.
