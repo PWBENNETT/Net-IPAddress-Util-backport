@@ -137,7 +137,6 @@ sub as_n128 {
             $accum->badd(Math::BigInt->new('' . unpack 'N32', substr($self->{ address }, $i, 4)));
         }
         $rv = $keep ? $accum : "$accum";
-        no Math::BigInt unless $keep;
     }
     return $rv;
 }
