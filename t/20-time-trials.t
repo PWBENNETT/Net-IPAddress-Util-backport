@@ -44,7 +44,7 @@ else {
                 $savings += eval { ($tp - $tr) / $tp };
             }
         }
-        $savings = (0 - $savings) / $mult;
+        $savings = sprintf('%.3f', (0 - $savings) / $mult);
         diag("Radix-Sorting (1 .. 100) IPv4 addresses averages $savings\% faster");
     }
     {
@@ -71,7 +71,7 @@ else {
                 $savings += eval { ($tp - $tr) / $tp };
             }
         }
-        $savings = (0 - $savings) / $mult;
+        $savings = sprintf('%.3f', (0 - $savings) / $mult);
         diag("Radix-Sorting (1 .. 100) IPv6 addresses averages $savings\% faster");
     }
     {
@@ -99,7 +99,7 @@ else {
                 $savings += eval { ($tp - $tr) / $tp };
             }
         }
-        $savings = (0 - $savings) / $mult;
+        $savings = sprintf('%.3f', (0 - $savings) / $mult);
         diag("Radix-Sorting (1 .. 100) IPv6 address ranges averages $savings\% faster");
     }
     ok('Ran time trials');
