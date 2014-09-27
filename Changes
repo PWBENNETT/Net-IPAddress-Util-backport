@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+3.013   2014-09-27
+        Fix RT #99174: IPv6 addresses with fewer than 4 digits per word handled wrong
+
 3.000   2013-11-01
         Back to proper CPAN-friendly version numbers
 

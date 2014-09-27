@@ -5,7 +5,7 @@ use 5.008008;
 use Net::IPAddress::Util qw( :constr );
 use Net::IPAddress::Util::Range;
 use Net::IPAddress::Util::Collection;
-use Test::More tests => 43;
+use Test::More tests => 45;
 
 $Net::IPAddress::Util::DIE_ON_ERROR = 1;
 
@@ -44,6 +44,14 @@ $Net::IPAddress::Util::DIE_ON_ERROR = 1;
     my $nf = $test->normal_form();
     is("$test" , '12::34', "Pure IPv6 round-trip");
     is($nf , '00120000000000000000000000000034', "Pure IPv6 round-trip normal form");
+}
+
+{
+    # diag('RT 99174');
+    my $test = IP('1:2::3:4');
+    my $nf = $test->normal_form();
+    is("$test" , '1:2::3:4', "RT 99174 round-trip");
+    is($nf , '00010002000000000000000000030004', "RT 99174 round-trip normal form");
 }
 
 {

@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.012';
+our $VERSION = '3.013';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -79,19 +79,19 @@ sub new {
             unpack('U4', pack('N', $address))
         ];
     }
-    elsif ($address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi) {
+    elsif (
+        $address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi
+        and 1 <= grep { /::/ } split /[[:alnum:]]+/, $address
+    ) {
         # new() from IPv6 address, accepting and ignoring the Scope ID
         $address = $1;
-        my ($upper, $lower) = split /::/, $address;
-        $lower = '' unless defined $lower;
+        my ($lhs, $rhs) = split /::/, $address;
+        $rhs = '' unless defined $rhs;
         my $hex = '0' x 32;
-        $upper =~ s/://g;
-        $lower =~ s/://g;
-        my $missing = 4 - (length($upper) % 4);
-        $missing = 0 if $missing == 4;
-        $upper = ('0' x $missing) . $upper;
-        substr($hex, 0,                length($upper)) = $upper;
-        substr($hex, - length($lower), length($lower)) = $lower;
+        $lhs = join '', map { substr('0000' . $_, -4) } split /:/, $lhs;
+        $rhs = join '', map { substr('0000' . $_, -4) } split /:/, $rhs;
+        substr($hex, 0,              length($lhs)) = $lhs;
+        substr($hex, - length($rhs), length($rhs)) = $rhs;
         my @hex = split //, $hex;
         $normal = [];
         while (@hex) {
@@ -165,9 +165,9 @@ sub ipv6 {
         return '::ffff:'.$self->ipv4();
     }
     my $rv = $self->ipv6_expanded();
-    $rv =~ s/(0000:)+/:/;
+    $rv =~ s/(?::)(0+:)+/::/;
     $rv =~ s/^0+//;
-    $rv =~ s/::0+/::/;
+    $rv =~ s/:0+/:/g;
     $rv =~ s/^:/::/;
     return $rv;
 }
@@ -488,7 +488,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.012
+Version 3.013
 
 =head1 SYNOPSIS
 
@@ -642,10 +642,12 @@ The exportable function n32_to_ipv4() converts an IPv4 address in "N32"
 format (i.e. a network-order 32-bit number) into an Net::IPAddress::Util
 object representing the same IPv4 address.
 
-=head1 OBJECT METHODS
+=head1 OVERLOADS
 
-All object methods supported by Math::BigInt are supported. In addition, the
-following methods exist specifically for IP Address manipulation:
+This module overloads a number of operators (cmp, E<lt>=E<gt>, &, |, ~,
++, -, E<lt>E<lt>, E<gt>E<gt>) in hopefully obvious ways.
+
+=head1 OBJECT METHODS
 
 =head2 is_ipv4
 
