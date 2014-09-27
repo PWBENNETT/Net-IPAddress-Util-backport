@@ -1,5 +1,11 @@
 Revision history for Net-IPAddress-Util
 
+3.014   2014-09-27
+        Fix typo in documentation: s/to_str/as_str/smg;
+
+        Code cleaning on something that bizarrely appeared to work as desired
+        despite being written in a highly nasty way.
+
 3.013   2014-09-27
         Fix RT #99174: IPv6 addresses with fewer than 4 digits per word handled wrong
 

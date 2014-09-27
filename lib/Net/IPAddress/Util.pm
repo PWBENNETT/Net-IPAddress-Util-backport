@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.013';
+our $VERSION = '3.014';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -80,8 +80,8 @@ sub new {
         ];
     }
     elsif (
-        $address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi
-        and 1 <= grep { /::/ } split /[[:alnum:]]+/, $address
+        1 <= grep { /::/ } split /[[:alnum:]]+/, $address
+        and $address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi
     ) {
         # new() from IPv6 address, accepting and ignoring the Scope ID
         $address = $1;
@@ -488,7 +488,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.013
+Version 3.014
 
 =head1 SYNOPSIS
 
@@ -700,9 +700,9 @@ or for other purposes where easy, fast sorting is desirable, for instance
 
 =head2 str
 
-=head2 to_str
+=head2 as_str
 
-=head2 to_string
+=head2 as_string
 
 If this object is an IPv4 address, it stringifies to the result of C<ipv4>,
 else it stringifies to the result of C<ipv6>.
