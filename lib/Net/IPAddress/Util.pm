@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.015';
+our $VERSION = '3.016';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -80,8 +80,7 @@ sub new {
         ];
     }
     elsif ($address =~ /^\d+$/o) {
-        eval "require Math::BigInt";
-        Math::BigInt->import(try => 'GMP,Pari,Calc');
+        eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
         my $raw = Math::BigInt->new("$address");
         while (my $word = $raw->copy->band(0xffffffff)) {
             unshift @$normal, unpack('U4', pack('N', $word));
@@ -90,7 +89,7 @@ sub new {
         while (@$normal < 16) {
             unshift @$normal, 0;
         }
-        no Math::BigInt;
+        eval "no Math::BigInt";
     }
     elsif (
         1 <= grep { /::/o } split /[[:alnum:]]+/, $address
@@ -142,13 +141,13 @@ sub as_n128 {
     my $rv;
     {
         eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
-        Math::BigInt->import(try => 'GMP,Pari,Calc');
         my $accum = Math::BigInt->new('0');
         my $factor = Math::BigInt->new('1')->blsft(Math::BigInt->new('32'));
         for my $i (map { $_ * 4 } 0 .. 3) {
             $accum->bmul($factor);
-            $accum->badd(Math::BigInt->new('' . unpack 'N32', substr($self->{ address }, $i, 4)));
+            $accum->badd(Math::BigInt->new('' . unpack 'N', substr($self->{ address }, $i, 4)));
         }
+        eval "no Math::BigInt" unless $keep;
         $rv = $keep ? $accum : "$accum";
     }
     return $rv;
@@ -501,7 +500,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.015
+Version 3.016
 
 =head1 SYNOPSIS
 
