@@ -1,6 +1,8 @@
 #! /usr/bin/env perl
 
-use 5.008008;
+use 5.012;
+use utf8;
+no diagnostics;
 
 use Net::IPAddress::Util qw( :constr );
 use Net::IPAddress::Util::Range;

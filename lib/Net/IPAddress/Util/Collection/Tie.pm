@@ -48,7 +48,7 @@ sub DELETE {
 
 sub CLEAR {
     my ($self) = @_;
-    $self->set_contents([]);
+    $self->{ contents } = [ ];
     return $self->{ contents };
 }
 
@@ -102,6 +102,12 @@ __END__
 =head1 NAME
 
 Net::IPAddress::Util::Collection::Tie - These aren't the droids you're looking for
+
+=head1 METHODS
+
+=head2 new
+
+No, seriously. You should not be poking around back here. You are likely to be eaten by a grue.
 
 =cut
 

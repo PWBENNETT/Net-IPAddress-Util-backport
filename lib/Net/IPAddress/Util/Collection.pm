@@ -1,7 +1,8 @@
 package Net::IPAddress::Util::Collection;
 
-use 5.012000;
+use 5.012;
 use utf8;
+no diagnostics;
 
 require Net::IPAddress::Util;
 require Net::IPAddress::Util::Collection::Tie;
@@ -87,6 +88,10 @@ __END__
 =head1 NAME
 
 Net::IPAddress::Util::Collection - A collection of Net::IPAddress::Util::Range objects
+
+=head1 VERSION
+
+Version 3.017
 
 =head1 SYNOPSIS
 

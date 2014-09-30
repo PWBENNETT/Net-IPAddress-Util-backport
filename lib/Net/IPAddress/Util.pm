@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.016';
+our $VERSION = '3.017';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -78,6 +78,20 @@ sub new {
             0, 0, 0xff, 0xff,
             unpack('U4', pack('N', $address))
         ];
+    }
+    elsif ("$address" =~ /^([0-9a-f]{32})$/smio) {
+        my $fresh = $1;
+        eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
+        my $raw = Math::BigInt->from_hex("$fresh");
+        $normal ||= [ ];
+        while (my $word = $raw->copy->band(0xffffffff)) {
+            unshift @$normal, unpack('U4', pack('N', $word));
+            $raw = $raw->copy->brsft(32);
+        }
+        while (@$normal < 16) {
+            unshift @$normal, 0;
+        }
+        eval "no Math::BigInt";
     }
     elsif ($address =~ /^\d+$/o) {
         eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
@@ -436,6 +450,7 @@ sub ERROR {
 sub radix_sort (\@) {
     # In theory, a radix sort is O(N), which beats Perl's O(N log N) by
     # a fair margin. However, it _does_ discard duplicates, so ymmv.
+    shift if $_[0] eq __PACKAGE__;
     my $array = shift;
     my $from = [ map { [ unpack 'U16', $_->{ address } ] } @$array ];
     my $to;
@@ -500,7 +515,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.016
+Version 3.017
 
 =head1 SYNOPSIS
 
@@ -570,6 +585,17 @@ arrays.
 
 Take a truncated bit array, and right-pad it with zeroes to the appropriate
 length.
+
+=head2 ipv4_mask
+
+Returns a bitmask that can be ANDed against an IP to pull out only
+the IPv4-relevant bits, that is the N32 portion with the 0xffff appended to its
+front.
+
+=head2 ipv4_flag
+
+Returns a bitmask that can be ORed onto an N32 to make it a proper "IPv4
+stored as IPv6" N128.
 
 =head2 radix_sort
 
@@ -725,6 +751,14 @@ else it stringifies to the result of C<ipv6>.
 
 Either confess()es or cluck()s the passed string based on the value of
 $Net::IPAddress::Util::DIE_ON_ERROR, and if possible returns undef.
+
+=head1 LICENSE
+
+May be redistributed and/or modified under terms of the Artistic License v2.0.
+
+=head1 AUTHOR
+
+PWBENNETT -- paul(dot)w(dot)bennett(at)gmail.com
 
 =cut
 

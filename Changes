@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+3.017   2014-09-29
+        Code beautifying for Kwalitee purposes
+
 3.016   2014-09-29
         Code cleaning
 

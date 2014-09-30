@@ -1,7 +1,8 @@
 #! perl -T
 
-use strict;
-use warnings;
+use 5.012;
+use utf8;
+no diagnostics;
 
 use Test::More tests => 5;
 

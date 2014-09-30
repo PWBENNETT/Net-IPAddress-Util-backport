@@ -1,12 +1,13 @@
 package Net::IPAddress::Util::Range;
 
-use 5.012000;
+use 5.012;
 use utf8;
+no diagnostics;
 
 use overload (
     '""' => 'as_string',
-    '<=>' => 'spaceship',
-    'cmp' => 'spaceship',
+    '<=>' => '_spaceship',
+    'cmp' => '_spaceship',
 );
 
 use Exporter qw( import );
@@ -136,7 +137,7 @@ sub loose {
     return ref($self)->new({ lower => $hr->{ base }, upper => $hr->{ highest } });
 }
 
-sub spaceship {
+sub _spaceship {
     my ($self, $rhs, $swapped) = @_;
     ($self, $rhs) = ($rhs, $self) if $swapped;
     $rhs = ref($self)->new({ ip => $rhs }) unless ref($self) eq ref($rhs);
@@ -175,6 +176,10 @@ __END__
 =head1 NAME
 
 Net::IPAddress::Util::Range - Representation of a range of IP addresses
+
+=head1 VERSION
+
+Version 3.017
 
 =head1 SYNOPSIS
 
@@ -238,11 +243,22 @@ the addresses in this range. Note that this is not automatically the same
 thing as "the subnet that matches this range", as a range may or may not be
 aligned to legal subnet boundaries.
 
+=head2 inner_bounds
+
+Return the bounds of the largest subnet capable of being completely contained
+by the addresses in this range. Note that this is not automatically the same
+thing as "the subnet that matches this range", as a range may or may not be
+aligned to legal subnet boundaries.
+
 =head2 tight
 
 Returns a collection of subnets that (between them) exactly match the
-addresses in this range. The returned object is an Net::IPAddress::Util::Collection,
-which can be treated as an array reference.
+addresses in this range. The returned object is a Net::IPAddress::Util::Collection,
+which can be treated as an array reference of Net::IPAddress::Util::Range objects.
+
+=head2 loose
+
+Returns a blessed object (of this class) representing the range returned by outer_bounds().
 
 =head2 lower
 
