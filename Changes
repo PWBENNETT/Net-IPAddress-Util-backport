@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+3.015   2014-09-27
+        Was not accepting integers bigger than 32 bits, regardless of $PROMOTE_N32 setting
+
 3.014   2014-09-27
         Fix typo in documentation: s/to_str/as_str/smg;
 

@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.014';
+our $VERSION = '3.015';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -63,7 +63,7 @@ sub new {
     elsif (ref $address and eval { $address->isa(__PACKAGE__) }) {
         return bless { address => $address->{ address } } => $class;
     }
-    elsif ($address =~ /^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+    elsif ($address =~ /^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/o) {
         $normal = [
             0, 0, 0, 0,
             0, 0, 0, 0,
@@ -71,7 +71,7 @@ sub new {
             $1, $2, $3, $4
         ];
     }
-    elsif ($PROMOTE_N32 and $address =~ /^\d+$/ and $address >= 0 and $address <= (2 ** 32) - 1) {
+    elsif ($PROMOTE_N32 and $address =~ /^\d+$/o and $address >= 0 and $address <= (2 ** 32) - 1) {
         $normal = [
             0, 0, 0, 0,
             0, 0, 0, 0,
@@ -79,8 +79,21 @@ sub new {
             unpack('U4', pack('N', $address))
         ];
     }
+    elsif ($address =~ /^\d+$/o) {
+        eval "require Math::BigInt";
+        Math::BigInt->import(try => 'GMP,Pari,Calc');
+        my $raw = Math::BigInt->new("$address");
+        while (my $word = $raw->copy->band(0xffffffff)) {
+            unshift @$normal, unpack('U4', pack('N', $word));
+            $raw = $raw->copy->brsft(32);
+        }
+        while (@$normal < 16) {
+            unshift @$normal, 0;
+        }
+        no Math::BigInt;
+    }
     elsif (
-        1 <= grep { /::/ } split /[[:alnum:]]+/, $address
+        1 <= grep { /::/o } split /[[:alnum:]]+/, $address
         and $address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi
     ) {
         # new() from IPv6 address, accepting and ignoring the Scope ID
@@ -408,7 +421,7 @@ sub implode_ip {
     return Net::IPAddress::Util->new([ unpack 'U16', pack 'B128', join '', map { split // } @_ ]);
 }
 
-sub n32_to_ipv4 { IP(@_) }
+sub n32_to_ipv4 { local $PROMOTE_N32 = 1; return IP(@_) }
 
 sub ERROR {
     my $msg = @_ ? shift() : 'An error has occured';
@@ -488,7 +501,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.014
+Version 3.015
 
 =head1 SYNOPSIS
 

@@ -5,9 +5,10 @@ use 5.008008;
 use Net::IPAddress::Util qw( :constr );
 use Net::IPAddress::Util::Range;
 use Net::IPAddress::Util::Collection;
-use Test::More tests => 45;
+use Test::More tests => 47;
 
 $Net::IPAddress::Util::DIE_ON_ERROR = 1;
+$Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
     # diag('Pure IPv4');
@@ -20,6 +21,14 @@ $Net::IPAddress::Util::DIE_ON_ERROR = 1;
     is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 round-trip normal form");
     is($test->as_n32(), '3232235521', "Pure IPv4 round-trip via as_n32()");
     is($test->as_n128(), '281473913978881', "Pure IPv4 round-trip via as_n128()");
+}
+
+{
+    # diag('Pure IPv4 the other way around');
+    my $test = IP('281473913978881');
+    my $nf = $test->normal_form();
+    is("$test"      ,        '192.168.0.1', "Pure IPv4 the other way around round-trip overloaded");
+    is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 the other way around round-trip normal form");
 }
 
 {
