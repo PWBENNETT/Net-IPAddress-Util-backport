@@ -1,8 +1,8 @@
 package Net::IPAddress::Util::Collection::Tie;
 
-use 5.012000;
-use strict;
-use warnings;
+use 5.012;
+use utf8;
+no diagnostics;
 
 use Carp qw( confess );
 

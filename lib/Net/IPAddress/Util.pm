@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.017';
+our $VERSION = '3.018';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -53,7 +53,7 @@ sub new {
     my $self = shift;
     my $class = ref($self) || $self;
     my ($address) = @_;
-    my $normal;
+    my $normal = [ ];
     if (ref($address) eq 'ARRAY' && @$address == 16) {
         $normal = $address;
     }
@@ -83,8 +83,8 @@ sub new {
         my $fresh = $1;
         eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
         my $raw = Math::BigInt->from_hex("$fresh");
-        $normal ||= [ ];
-        while (my $word = $raw->copy->band(0xffffffff)) {
+        while ($raw > 0) {
+            my $word = $raw->copy->band(0xffffffff);
             unshift @$normal, unpack('U4', pack('N', $word));
             $raw = $raw->copy->brsft(32);
         }
@@ -96,7 +96,8 @@ sub new {
     elsif ($address =~ /^\d+$/o) {
         eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
         my $raw = Math::BigInt->new("$address");
-        while (my $word = $raw->copy->band(0xffffffff)) {
+        while ($raw > 0) {
+            my $word = $raw->copy->band(0xffffffff);
             unshift @$normal, unpack('U4', pack('N', $word));
             $raw = $raw->copy->brsft(32);
         }
@@ -119,7 +120,6 @@ sub new {
         substr($hex, 0,              length($lhs)) = $lhs;
         substr($hex, - length($rhs), length($rhs)) = $rhs;
         my @hex = split //, $hex;
-        $normal = [];
         while (@hex) {
             push @$normal, hex(join('', splice(@hex, 0, 2)));
         }
@@ -515,7 +515,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.017
+Version 3.018
 
 =head1 SYNOPSIS
 

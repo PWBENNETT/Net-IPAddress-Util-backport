@@ -91,7 +91,7 @@ Net::IPAddress::Util::Collection - A collection of Net::IPAddress::Util::Range o
 
 =head1 VERSION
 
-Version 3.017
+Version 3.018
 
 =head1 SYNOPSIS
 

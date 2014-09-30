@@ -179,7 +179,7 @@ Net::IPAddress::Util::Range - Representation of a range of IP addresses
 
 =head1 VERSION
 
-Version 3.017
+Version 3.018
 
 =head1 SYNOPSIS
 
