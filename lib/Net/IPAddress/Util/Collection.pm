@@ -1,8 +1,9 @@
 package Net::IPAddress::Util::Collection;
 
+use strict;
+use warnings;
 use 5.012;
 use utf8;
-no diagnostics;
 
 require Net::IPAddress::Util;
 require Net::IPAddress::Util::Collection::Tie;
@@ -91,7 +92,7 @@ Net::IPAddress::Util::Collection - A collection of Net::IPAddress::Util::Range o
 
 =head1 VERSION
 
-Version 3.018
+Version 3.020
 
 =head1 SYNOPSIS
 

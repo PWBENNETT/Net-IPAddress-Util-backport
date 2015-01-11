@@ -1,8 +1,9 @@
 package Net::IPAddress::Util;
 
-use 5.012000;
+use strict;
+use warnings;
+use 5.012;
 use utf8;
-no diagnostics;
 
 use overload (
     '=' => 'new',
@@ -43,7 +44,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.018';
+our $VERSION = '3.020';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -515,7 +516,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.018
+Version 3.020
 
 =head1 SYNOPSIS
 

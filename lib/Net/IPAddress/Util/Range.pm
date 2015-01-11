@@ -1,8 +1,9 @@
 package Net::IPAddress::Util::Range;
 
+use strict;
+use warnings;
 use 5.012;
 use utf8;
-no diagnostics;
 
 use overload (
     '""' => 'as_string',
@@ -179,7 +180,7 @@ Net::IPAddress::Util::Range - Representation of a range of IP addresses
 
 =head1 VERSION
 
-Version 3.018
+Version 3.020
 
 =head1 SYNOPSIS
 
