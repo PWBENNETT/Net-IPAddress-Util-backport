@@ -44,7 +44,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.020';
+our $VERSION = '3.021';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -108,7 +108,10 @@ sub new {
         eval "no Math::BigInt";
     }
     elsif (
-        1 <= grep { /::/o } split /[[:alnum:]]+/, $address
+        (
+            scalar(grep { /::/o } split(/[[:alnum:]]+/, $address)) == 1
+            or scalar(grep { /[[:alnum:]]+/ } split(/:/, $address)) == 8
+        )
         and $address =~ /^([0-9a-f:]+)(?:\%.*)?$/msoi
     ) {
         # new() from IPv6 address, accepting and ignoring the Scope ID

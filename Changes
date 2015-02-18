@@ -1,5 +1,11 @@
 Revision history for Net-IPAddress-Util
 
+3.021   2015-02-18
+        Wasn't properly identifying well-formed IPv6 addresses
+
+3.020   2015-01-??
+        Code beautifying for Kwalitee purposes
+
 3.019   2015-01-10
         Code beautifying for Kwalitee purposes
 

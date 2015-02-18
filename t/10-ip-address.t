@@ -7,7 +7,7 @@ no diagnostics;
 use Net::IPAddress::Util qw( :constr );
 use Net::IPAddress::Util::Range;
 use Net::IPAddress::Util::Collection;
-use Test::More tests => 47;
+use Test::More tests => 49;
 
 $Net::IPAddress::Util::DIE_ON_ERROR = 1;
 $Net::IPAddress::Util::PROMOTE_N32 = 0;
@@ -55,6 +55,14 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
     my $nf = $test->normal_form();
     is("$test" , '12::34', "Pure IPv6 round-trip");
     is($nf , '00120000000000000000000000000034', "Pure IPv6 round-trip normal form");
+}
+
+{
+    # diag('Pure IPv6 without a ::');
+    my $test = IP('1:2:3:4:5:6:7:8');
+    my $nf = $test->normal_form();
+    is("$test" , '1:2:3:4:5:6:7:8', "Pure IPv6 without a :: round-trip");
+    is($nf , '00010002000300040005000600070008', "Pure IPv6 without a :: round-trip normal form");
 }
 
 {

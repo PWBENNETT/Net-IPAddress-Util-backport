@@ -22,7 +22,9 @@
    "prereqs" : {
       "build" : {
          "requires" : {
-            "ExtUtils::MakeMaker" : "0"
+            "ExtUtils::MakeMaker" : "0",
+            "Test::More" : "0",
+            "Time::HiRes" : "0"
          }
       },
       "configure" : {
@@ -36,12 +38,12 @@
             "Exporter" : "0",
             "List::MoreUtils" : "0",
             "Math::BigInt" : "0",
-            "Test::More" : "0",
-            "Time::HiRes" : "0",
-            "perl" : "5.012000"
+            "overload" : "0",
+            "perl" : "5.012000",
+            "utf8" : "0"
          }
       }
    },
    "release_status" : "stable",
-   "version" : "3.019"
+   "version" : "3.021"
 }
