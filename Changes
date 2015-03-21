@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+3.022   2015-03-21
+        Solve some extreme edge cases that can arise due to unpacking 'U' and then packing 'C'
+
 3.021   2015-02-18
         Wasn't properly identifying well-formed IPv6 addresses
 
