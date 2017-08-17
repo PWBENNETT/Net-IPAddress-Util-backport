@@ -2,8 +2,7 @@ package Net::IPAddress::Util;
 
 use strict;
 use warnings;
-use 5.012;
-use utf8;
+use 5.010;
 
 use overload (
     '=' => 'new',
@@ -44,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.022';
+our $VERSION = '3.028';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -54,6 +53,9 @@ sub new {
     my $self = shift;
     my $class = ref($self) || $self;
     my ($address) = @_;
+    unless (defined $address) {
+        return ERROR("Invalid argument undef() provided");
+    }
     my $normal = [ ];
     if (ref($address) eq 'ARRAY' && @$address == 16) {
         $normal = $address;
@@ -132,7 +134,7 @@ sub new {
         return bless { address => $address } => $class;
     }
     else {
-        confess("I can't handle `$address', a(n) " . (ref($address) || 'bare scalar'));
+        return ERROR("Invalid argument `$address', a(n) " . (ref($address) || 'bare scalar') . ' provided');
     }
     return bless { address => pack('C16', @$normal) } => $class;
 }
@@ -194,11 +196,10 @@ sub ipv6 {
     if ($self->is_ipv4()) {
         return '::ffff:'.$self->ipv4();
     }
-    my $rv = $self->ipv6_expanded();
-    $rv =~ s/(?::)(0+:)+/::/;
-    $rv =~ s/^0+//;
-    $rv =~ s/:0+/:/g;
-    $rv =~ s/^:/::/;
+    my $iv = $self->ipv6_expanded();
+    my $rv = join(':', map { (my $x = $_) =~ s/^0+//; $x ||= '0'; $x } split ':', $iv);
+    $rv =~ s/[^[:xdigit:]]0(:0)+/::/;
+    $rv =~ s/::+/::/g;
     return $rv;
 }
 
@@ -519,7 +520,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.020
+Version 3.028
 
 =head1 SYNOPSIS
 

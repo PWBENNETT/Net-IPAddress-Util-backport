@@ -2,14 +2,11 @@ package Net::IPAddress::Util::Collection;
 
 use strict;
 use warnings;
-use 5.012;
-use utf8;
+use 5.010;
 
 require Net::IPAddress::Util;
 require Net::IPAddress::Util::Collection::Tie;
 require Net::IPAddress::Util::Range;
-
-our $RADIX_THRESHOLD;
 
 sub new {
     my $class    = ref($_[0]) ? ref(shift()) : shift;
@@ -23,7 +20,7 @@ sub sorted {
     my $self = shift;
     # In theory, a raw radix sort is O(N), which beats Perl's O(N log N) by
     # a fair margin. However, it _does_ discard duplicates, so ymmv.
-    my $from = [ map { [ unpack('U32', $_->{ lower }->{ address } . $_->{ upper }->{ address }) ] } @$self ];
+    my $from = [ map { [ unpack('C32', $_->{ lower }->{ address } . $_->{ upper }->{ address }) ] } @$self ];
     my $to;
     for (my $i = 31; $i >= 0; $i--) {
         $to = [];
@@ -92,7 +89,7 @@ Net::IPAddress::Util::Collection - A collection of Net::IPAddress::Util::Range o
 
 =head1 VERSION
 
-Version 3.020
+Version 3.028
 
 =head1 SYNOPSIS
 
@@ -142,15 +139,6 @@ Stringification for CIDR-style strings.
 =head2 as_netmasks
 
 Stringification for Netmask-style strings.
-
-=head1 GLOBAL VARIABLES
-
-=head2 $Net::IPAddress::Util::Collection::RADIX_THRESHOLD
-
-If set to any defined value (including zero), collections with more than
-$RADIX_THRESHOLD elements will be sorted using the radix sort algorithm,
-which can be faster than Perl's native sort for large data sets. The default
-value is C<undef()>.
 
 =cut
 

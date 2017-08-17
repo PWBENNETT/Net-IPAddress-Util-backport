@@ -1,5 +1,24 @@
 Revision history for Net-IPAddress-Util
 
+3.028   2017-08-17
+        Clean up versioning in docs & throughout
+
+3.027   2016-04-13
+        Clean up versioning in docs & throughout
+
+3.026   2016-04-07
+        Respond better to unparseable arguments
+        Respond to undef() arguments early, instead of trying to parse them
+
+3.025   2016-03-30
+        Trying again to fix stringification of IPv6 addresses
+
+3.024   2016-03-30
+        Fix stringification of IPv6 addresses
+
+3.023   2015-03-21
+        Remove requirement for Perl 5.12, to see whether it'll work on vanilla 5.10
+
 3.022   2015-03-21
         Solve some extreme edge cases that can arise due to unpacking 'U' and then packing 'C'
 

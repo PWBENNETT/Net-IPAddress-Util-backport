@@ -1,8 +1,6 @@
-#! perl -T
+#!/usr/bin/env perl
 
-use 5.012;
-use utf8;
-no diagnostics;
+use 5.010;
 
 use Test::More tests => 5;
 
