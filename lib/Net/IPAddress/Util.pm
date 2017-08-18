@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.029';
+our $VERSION = '3.030';
 
 sub IP {
     return Net::IPAddress::Util->new($_[0]);
@@ -61,6 +61,7 @@ sub new {
         $normal = $address;
     }
     elsif (ref($address) eq 'ARRAY' && @$address == 4) {
+        # FIXME Principal of least surprise here? Should feeding in 4 values make an IPv4?
         $normal = [ unpack 'C16', pack 'N4', @$address ];
     }
     elsif (ref $address and eval { $address->isa(__PACKAGE__) }) {
@@ -520,7 +521,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.028
+Version 3.030
 
 =head1 SYNOPSIS
 

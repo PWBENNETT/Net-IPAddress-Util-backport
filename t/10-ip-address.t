@@ -78,8 +78,8 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
     my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
     my $bounds = $range->outer_bounds();
     is("$range"              , '(192.168.0.1 .. 192.168.0.1)', "Single IPv4 range");
-    is("$bounds->{ base }"   , '192.168.0.1', "Single IPv4 base");
-    is("$bounds->{ highest }", '192.168.0.1', "Single IPv4 highest");
+    is("$bounds->{ lower }"  , '192.168.0.1', "Single IPv4 base");
+    is("$bounds->{ upper }"  , '192.168.0.1', "Single IPv4 highest");
     is("$bounds->{ netmask }", '255.255.255.255', "Single IPv4 netmask");
     is("$bounds->{ cidr }"   , '32', "Single IPv4 cidr");
 }
@@ -91,8 +91,8 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
     my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
     my $bounds = $range->outer_bounds();
     is("$range"              , '(12::34 .. 12::34)', "Single IPv6 range");
-    is("$bounds->{ base }"   , '12::34', "Single IPv6 base");
-    is("$bounds->{ highest }", '12::34', "Single IPv6 highest");
+    is("$bounds->{ lower }"  , '12::34', "Single IPv6 base");
+    is("$bounds->{ upper }"  , '12::34', "Single IPv6 highest");
     is("$bounds->{ netmask }", 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff', "Single IPv6 netmask");
     is("$bounds->{ cidr }"   , '128', "Single IPv6 cidr");
 }
@@ -104,8 +104,8 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
     my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
     my $bounds = $range->outer_bounds();
     is("$range"              , '(192.168.0.3 .. 192.168.0.123)', "Large-range range");
-    is("$bounds->{ base }"   , '192.168.0.0', "Large-range base");
-    is("$bounds->{ highest }", '192.168.0.127', "Large-range highest");
+    is("$bounds->{ lower }"  , '192.168.0.0', "Large-range base");
+    is("$bounds->{ upper }"  , '192.168.0.127', "Large-range highest");
     is("$bounds->{ netmask }", '255.255.255.128', "Large-range netmask");
     is("$bounds->{ cidr }"   , '25', "Large-range cidr");
 }

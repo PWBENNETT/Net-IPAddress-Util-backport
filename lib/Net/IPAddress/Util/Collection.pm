@@ -20,6 +20,7 @@ sub sorted {
     my $self = shift;
     # In theory, a raw radix sort is O(N), which beats Perl's O(N log N) by
     # a fair margin. However, it _does_ discard duplicates, so ymmv.
+    # FIXME Should we sort by hi, lo instead of lo, hi?
     my $from = [ map { [ unpack('C32', $_->{ lower }->{ address } . $_->{ upper }->{ address }) ] } @$self ];
     my $to;
     for (my $i = 31; $i >= 0; $i--) {
@@ -89,7 +90,7 @@ Net::IPAddress::Util::Collection - A collection of Net::IPAddress::Util::Range o
 
 =head1 VERSION
 
-Version 3.029
+Version 3.030
 
 =head1 SYNOPSIS
 

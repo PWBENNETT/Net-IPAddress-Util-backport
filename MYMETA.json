@@ -37,8 +37,7 @@
             "List::MoreUtils" : "0",
             "Math::BigInt" : "0",
             "overload" : "0",
-            "perl" : "5.010000",
-            "utf8" : "0"
+            "perl" : "5.010000"
          }
       },
       "test" : {

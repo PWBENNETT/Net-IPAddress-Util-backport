@@ -17,7 +17,6 @@ WriteMakefile(
         'List::MoreUtils' => '0',
         'Math::BigInt' => '0',
         'overload' => '0',
-        'utf8' => '0',
     },
     TEST_REQUIRES => { 'Test::More' => 0, 'Time::HiRes' => '0', },
     MIN_PERL_VERSION => '5.010000',

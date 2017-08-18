@@ -99,12 +99,12 @@ sub outer_bounds {
     if ($base->is_ipv4()) {
         $nm &= ipv4_mask();
     }
-    return {
-        base    => $base,
+    return bless {
+        lower   => $base,
         cidr    => $cidr,
         netmask => $nm,
-        highest => $hi,
-    };
+        upper   => $hi,
+    } => ref($self);
 }
 
 sub inner_bounds {
@@ -112,7 +112,7 @@ sub inner_bounds {
     return $self if $self->{ upper } == $self->{ lower };
     my $bounds = $self->outer_bounds();
     my $new = ref($self)->new($self);
-    while ($bounds->{ highest } > $self->{ upper } or $bounds->{ base } < $self->{ lower }) {
+    while ($bounds->{ upper } > $self->{ upper } or $bounds->{ lower } < $self->{ lower }) {
         $new = ref($self)->new({ ip => $self->{ lower }, cidr => $bounds->{ cidr } + 1 });
         $bounds = $new->outer_bounds();
     }
@@ -122,19 +122,19 @@ sub inner_bounds {
 sub as_cidr {
     my $self = shift;
     my $hr = $self->outer_bounds();
-    return "$hr->{ base }" . '/' . "$hr->{ cidr }";
+    return "$hr->{ lower }" . '/' . "$hr->{ cidr }";
 }
 
 sub as_netmask {
     my $self = shift;
     my $hr = $self->outer_bounds();
-    return "$hr->{ base }" . ' (' . "$hr->{ netmask }" . ')';
+    return "$hr->{ lower }" . ' (' . "$hr->{ netmask }" . ')';
 }
 
 sub loose {
     my $self = shift;
     my $hr = $self->outer_bounds();
-    return ref($self)->new({ lower => $hr->{ base }, upper => $hr->{ highest } });
+    return ref($self)->new({ lower => $hr->{ lower }, upper => $hr->{ upper } });
 }
 
 sub _spaceship {
@@ -179,7 +179,7 @@ Net::IPAddress::Util::Range - Representation of a range of IP addresses
 
 =head1 VERSION
 
-Version 3.029
+Version 3.030
 
 =head1 SYNOPSIS
 
