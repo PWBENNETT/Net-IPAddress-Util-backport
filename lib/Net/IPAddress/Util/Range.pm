@@ -209,8 +209,8 @@ Version 3.033
 
 =head1 DESCRIPTION
 
-Sometimes when dealing with IP Addresses, it can be nice to talk about 
-contiguous ranges of them as whole collections of addresses without worrying 
+Sometimes when dealing with IP Addresses, it can be nice to talk about
+contiguous ranges of them as whole collections of addresses without worrying
 that the contiguous range is exactly a CIDR-compatible range.
 
 This is what Net::IPAdress::Util::Range is for. Objects of this class act
@@ -244,15 +244,15 @@ passed in, and you'll get back a Range representing that whole CIDR.
 
 =item C<ip> and C<cidr>
 
-Pass in an IP and a numeric CIDR (which B<MUST> be valid for the version (4 or 
+Pass in an IP and a numeric CIDR (which B<MUST> be valid for the version (4 or
 6) of the IP), and you'll get back a Range representing that whole CIDR.
 
 =item C<ip> and C<netmask>
 
-Pass in two IPs, of the same version, and they'll be treated exacatly as the 
+Pass in two IPs, of the same version, and they'll be treated exacatly as the
 argument names suggest. The C<netmask> argument B<MUST> (in binary) start with
 zero or more ones, followed by enough zeroes to pad out to the correct number
-of bits (either 32 or 128 for IPv4 or IPv6 respectively). The C<ip> argument 
+of bits (either 32 or 128 for IPv4 or IPv6 respectively). The C<ip> argument
 B<MUST> have the same number of right-hand zeroes as the C<netmask> argument.
 
 =back
@@ -304,4 +304,3 @@ Returns a blessed object (of this class) representing the range returned by oute
 Get the lower or upper bounds of this range.
 
 =cut
-

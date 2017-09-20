@@ -31,8 +31,8 @@ our %EXPORT_TAGS = (
 
 my %EXPORT_OK;
 for my $k (keys %EXPORT_TAGS) {
-  for my $v (@{$EXPORT_TAGS{$k}}) {
-    $EXPORT_OK{$v} = 1;
+  for my $v (@{$EXPORT_TAGS{ $k }}) {
+    undef $EXPORT_OK{ $v };
   }
 }
 
@@ -62,6 +62,7 @@ sub new {
   }
   elsif (ref($address) eq 'ARRAY' && @$address == 4) {
     # FIXME Principal of least surprise here? Should feeding in 4 values make an IPv4?
+    # TODO At least document what it's doing, to reduce the surprise.
     $normal = [ unpack 'C16', pack 'N4', @$address ];
   }
   elsif (ref $address and eval { $address->isa(__PACKAGE__) }) {
@@ -767,4 +768,3 @@ May be redistributed and/or modified under terms of the Artistic License v2.0.
 PWBENNETT -- paul(dot)w(dot)bennett(at)gmail.com
 
 =cut
-

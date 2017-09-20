@@ -115,8 +115,8 @@ This is what Net::IPAdress::Util::Collection is for. Objects of this class act
 as type-checked ARRAYREFs where every entry must be some kind of IP Address
 data (either a single address or an arbitrary range).
 
-Knowing that the data within are type-checked (and knowing their specific 
-type), we can do a few extra things to the ARRAYREF as a whole that we could 
+Knowing that the data within are type-checked (and knowing their specific
+type), we can do a few extra things to the ARRAYREF as a whole that we could
 not (read I<probably should not>) do to general untyped arrays. Things such as
 sorting them via a Radix Sort (which is faster than Perl's builtin sort()),
 and being able to smoosh together IP ranges that touch or overlap. What is
@@ -159,7 +159,7 @@ Returns an array of stringified (x .. y) style ranges.
 
 =head2 as_cidrs
 
-Returns an array of stringified CIDR-style strings. In the case where one 
+Returns an array of stringified CIDR-style strings. In the case where one
 element of the Collection cannot be legally represented as a CIDR, you will get
 in its place the smallest single legal CIDR that contains that element.
 
@@ -169,9 +169,9 @@ In other words, if you want complete accuracy, you will want to use:
 
 =head2 as_netmasks
 
-Returns an array of stringified Netmask-style strings. In the case where one 
-element of the Collection cannot be legally represented as a Netmask string, 
-you will get in its place the smallest single legal Netmask string that 
+Returns an array of stringified Netmask-style strings. In the case where one
+element of the Collection cannot be legally represented as a Netmask string,
+you will get in its place the smallest single legal Netmask string that
 contains that element.
 
 
@@ -180,4 +180,3 @@ In other words, if you want complete accuracy, you will want to use:
   $collection->tight->as_netmasks;
 
 =cut
-

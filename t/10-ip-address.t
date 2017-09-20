@@ -199,5 +199,3 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   is("$ip", '192.168.0.1', 'PROMOTE_N32');
   is($ip->as_n32(), 3232235521, 'as_n32()');
 }
-
-
