@@ -13,7 +13,7 @@ use overload (
 use Net::IPAddress::Util qw( :constr :manip );
 require Net::IPAddress::Util::Collection;
 
-our $VERSION = '3.034';
+our $VERSION = '4.000';
 
 sub new {
   my $class = shift;
@@ -21,8 +21,8 @@ sub new {
   my ($arg_ref) = @_;
   my ($l, $u);
   if ($arg_ref->{ lower } && $arg_ref->{ upper }) {
-    $arg_ref->{ lower } = IP($arg_ref->{ lower }) unless ref($arg_ref->{ lower });
-    $arg_ref->{ upper } = IP($arg_ref->{ upper }) unless ref($arg_ref->{ upper });
+    $arg_ref->{ lower } = IP($arg_ref->{ lower });
+    $arg_ref->{ upper } = IP($arg_ref->{ upper });
     if ($arg_ref->{ lower } > $arg_ref->{ upper }) {
       ($arg_ref->{ lower }, $arg_ref->{ upper }) = ($arg_ref->{ upper }, $arg_ref->{ lower });
     }
@@ -47,12 +47,13 @@ sub new {
       my ($t, $cidr) = ($1, $2);
       $ip = IP($t);
       my $was_ipv4 = $ip->is_ipv4;
-      $nm = implode_ip(substr(('1' x 128) . ('0' x (($was_ipv4 ? 32 : 128) - $cidr)), -128));
+      my $span
+        = ($was_ipv4
+        ? 32
+        : 128) - $cidr
+        ;
+      $nm = implode_ip(substr(('1' x 128) . ('0' x $span), -128));
       $ip &= $nm;
-      if ($was_ipv4) {
-        my $fixup = ipv4_flag();
-        $ip |= $fixup;
-      }
       $l = $ip;
       $u = $ip | ~$nm;
     }
@@ -60,12 +61,13 @@ sub new {
       $ip = IP($arg_ref->{ ip });
       my $was_ipv4 = $ip->is_ipv4;
       my $cidr = $arg_ref->{ cidr };
-      $nm = implode_ip(substr(('1' x 128) . ('0' x (($was_ipv4 ? 32 : 128) - $cidr)), -128));
+      my $span
+        = ($was_ipv4
+        ? 32
+        : 128) - $cidr
+        ;
+      $nm = implode_ip(substr(('1' x 128) . ('0' x $span), -128));
       $ip &= $nm;
-      if ($was_ipv4) {
-        my $fixup = ipv4_flag();
-        $ip |= $fixup;
-      }
       $l = $ip;
       $u = $ip | ~$nm;
     }
@@ -95,11 +97,11 @@ sub outer_bounds {
   my @mask = prefix_mask(@l, @u);
   my $nm = implode_ip(ip_pad_prefix(@mask));
   my $x = ~$nm;
-  my $hi = IP($base);
-  $hi |= $x;
   if ($base->is_ipv4()) {
     $nm &= ipv4_mask();
   }
+  my $hi = IP($base);
+  $hi |= $x;
   return bless {
     lower   => $base,
     cidr    => $cidr,
@@ -180,7 +182,7 @@ Net::IPAddress::Util::Range - Representation of a range of IP addresses
 
 =head1 VERSION
 
-Version 3.034
+Version 4.000
 
 =head1 SYNOPSIS
 

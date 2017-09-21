@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '3.034';
+our $VERSION = '4.000';
 
 sub IP {
   return Net::IPAddress::Util->new($_[0]);
@@ -68,11 +68,11 @@ sub new {
   elsif (ref $address and eval { $address->isa(__PACKAGE__) }) {
     return bless { address => $address->{ address } } => $class;
   }
-  elsif ($address =~ /^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/o) {
+  elsif ($address =~ /^(?:::ffff:0:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/o) {
     $normal = [
       0, 0, 0, 0,
       0, 0, 0, 0,
-      0, 0, 0xff, 0xff,
+      0xff, 0xff, 0, 0,
       $1, $2, $3, $4
     ];
   }
@@ -80,7 +80,7 @@ sub new {
     $normal = [
       0, 0, 0, 0,
       0, 0, 0, 0,
-      0, 0, 0xff, 0xff,
+      0xff, 0xff, 0, 0,
       unpack('C4', pack('N', $address))
     ];
   }
@@ -144,7 +144,12 @@ sub new {
 sub is_ipv4 {
   my $self = shift;
   my @octets = unpack 'C16', $self->{ address };
-  return $octets[ 10 ] == 0xff && $octets[ 11 ] == 0xff && (!grep { $_ } @octets[ 0 .. 9 ]);
+  return
+    $octets[ 8 ] == 0xff
+    && $octets[ 9 ] == 0xff
+    && $octets[ 10 ] == 0
+    && $octets[ 11 ] == 0
+    && (!grep { $_ } @octets[ 0 .. 7 ]);
 }
 
 sub ipv4 {
@@ -196,12 +201,13 @@ sub ipv6_expanded {
 sub ipv6 {
   my $self = shift;
   if ($self->is_ipv4()) {
-    return '::ffff:'.$self->ipv4();
+    return '::ffff:0:'.$self->ipv4();
   }
   my $iv = $self->ipv6_expanded();
   my $rv = join(':', map { (my $x = $_) =~ s/^0+//; $x ||= '0'; $x } split ':', $iv);
   $rv =~ s/[^[:xdigit:]]0(:0)+/::/;
   $rv =~ s/::+/::/g;
+  $rv =~ s/^0::/::/;
   return $rv;
 }
 
@@ -332,8 +338,8 @@ sub _band {
   my @l = @$lhs;
   my @r = @$rhs;
   my @rv;
-  for my $octet (0 .. 3) {
-    $rv[$octet] = $l[$octet] & $r[$octet];
+  for my $hextet (0 .. 3) {
+    $rv[$hextet] = $l[$hextet] & $r[$hextet];
   }
   return Net::IPAddress::Util->new(\@rv);
 }
@@ -350,8 +356,8 @@ sub _bor {
   my @l = @$lhs;
   my @r = @$rhs;
   my @rv;
-  for my $octet (0 .. 3) {
-    $rv[$octet] = $l[$octet] | $r[$octet];
+  for my $hextet (0 .. 3) {
+    $rv[$hextet] = $l[$hextet] | $r[$hextet];
   }
   return Net::IPAddress::Util->new(\@rv);
 }
@@ -359,7 +365,6 @@ sub _bor {
 sub _neg {
   my $self = shift;
   my @n = unpack('C16', $self->{ address });
-  my ($pow, $mask) = $self->_pow_mask;
   my @rv = map { 255 - $_ } @n;
   return Net::IPAddress::Util->new(\@rv);
 }
@@ -370,7 +375,12 @@ sub _pow_mask {
   my $mask = pack('N4', 0, 0, 0, 0);
   if ($self->is_ipv4) {
     $pow = 32;
-    $mask = pack('N4', 0, 0, 0xffff, 0);
+    $mask = pack('C16',
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0xff, 0xff, 0, 0,
+      0, 0, 0, 0,
+    );
   }
   return ($pow, $mask);
 }
@@ -387,19 +397,19 @@ sub _mask_out {
 }
 
 sub ipv4_mask {
-  return implode_ip(('0' x 80) . ('1' x 48));
+  return implode_ip(('0' x 64) . ('1' x 16) . ('0' x 16) . ('1' x 32));
 }
 
 sub ipv4_flag {
-  return implode_ip(('0' x 80) . ('1' x 16) . ('0' x 32));
+  return implode_ip(('0' x 64) . ('1' x 16) . ('0' x 48));
 }
 
 sub common_prefix (\@\@) {
   my ($x, $y) = @_;
   return ERROR("Something isn't right there") unless @$x == @$y;
   my @rv;
-  for my $i ($[ .. $#$x) {
-    if($x->[$i] == $y->[$i]) {
+  for my $i (0 .. $#$x) {
+    if($x->[$i] eq $y->[$i]) {
       push @rv, $x->[$i];
     }
     else {
@@ -413,7 +423,7 @@ sub prefix_mask (\@\@) {
   my ($x, $y) = @_;
   return ERROR("Something isn't right there") unless @$x == @$y;
   my @rv;
-  for my $i ($[ .. $#$x) {
+  for my $i (0 .. $#$x) {
     if($x->[$i] == $y->[$i]) {
       push @rv, 1;
     }
@@ -522,7 +532,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 3.034
+Version 4.000
 
 =head1 SYNOPSIS
 
