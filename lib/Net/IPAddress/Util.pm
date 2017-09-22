@@ -43,7 +43,7 @@ $EXPORT_TAGS{ all } = [@EXPORT_OK];
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 
-our $VERSION = '4.000';
+our $VERSION = '4.001';
 
 sub IP {
   return Net::IPAddress::Util->new($_[0]);
@@ -532,22 +532,22 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 4.000
+Version 4.001
 
 =head1 SYNOPSIS
 
   use Net::IPAddress::Util qw( IP );
 
   my $ipv4  = IP('192.168.0.1');
-  my $ipv46 = IP('::ffff:192.168.0.1');
+  my $ipv46 = IP('::ffff:0:192.168.0.1');
   my $ipv6  = IP('fe80::1234:5678:90ab');
 
   print "$ipv4\n";  # 192.168.0.1
   print "$ipv46\n"; # 192.168.0.1
   print "$ipv6\n";  # fe80::1234:5678:90ab
 
-  print $ipv4->normal_form()  . "\n"; # 00000000000000000000ffffc0a80001
-  print $ipv46->normal_form() . "\n"; # 00000000000000000000ffffc0a80001
+  print $ipv4->normal_form()  . "\n"; # 0000000000000000ffff0000c0a80001
+  print $ipv46->normal_form() . "\n"; # 0000000000000000ffff0000c0a80001
   print $ipv6->normal_form()  . "\n"; # fe8000000000000000001234567890ab
 
   for (my $ip = IP('192.168.0.0'); $ip <= IP('192.168.0.255'); $ip++) {
@@ -659,7 +659,7 @@ Net::IPAddress::Util::Range or Net::IPAddress::Util::Collection modules.
 
 =head2 :sort
 
-Exports radix_sort(). You only need this if you're dealing with very large
+Exports C<radix_sort()>. You only need this if you're dealing with large
 arrays of Net::IPAddress::Util objects, and runtime is of critical concern.
 
 =head2 :compat
@@ -698,7 +698,7 @@ Creates a non-distructive clone of the object.
 
 =item A well-formed IPv4 or IPv6 string (including "IPv4 in IPv6" notation)
 
-Examples are C<1.2.3.4>, C<::ffff:1.2.3.4>, C<1:2::3:4>. Note that for IPv6
+Examples are C<1.2.3.4>, C<::ffff:0:1.2.3.4>, C<1:2::3:4>. Note that for IPv6
 flavor strings, the scope ID (if any) is silently discarded. Note also that this
 behavior is subject to change. If you feel strongly, go to CPAN RT and file a
 ticket.
@@ -789,7 +789,7 @@ not "CPU free".
 =head2 ipv6
 
 Returns the canonical IPv6 string representation of this object, for
-instance 'fe80::1234:5678:90ab' or '::ffff:192.168.0.1'.
+instance 'fe80::1234:5678:90ab' or '::ffff:0:192.168.0.1'.
 
 =head2 ipv6_expanded
 

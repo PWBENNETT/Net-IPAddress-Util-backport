@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+4.001   2017-09-22
+        Doc fix so that the POD specifies ::ffff:0:0:0/96 to agree with the code.
+
 4.000   2017-09-21
         Major backwards-incompatible bug fix. Was treating ::ffff:0:0/96 as SIIT
         instead of ::ffff:0:0:0/96. Was self-compatible, but RFC-wrong.
