@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+4.002   2017-10-04
+        Add "repair" functionality to upgrade v3.x data to v4.x format.
+
 4.001   2017-09-22
         Doc fix so that the POD specifies ::ffff:0:0:0/96 to agree with the code.
 
