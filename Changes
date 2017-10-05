@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+4.004   2017-10-05
+        Enhanced detection and logging of repairable <= v3.x data.
+
 4.003   2017-10-05
         Fix ::Tie so that it actually does what the POD says it does.
 
