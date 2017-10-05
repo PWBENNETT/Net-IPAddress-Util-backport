@@ -38,14 +38,14 @@ for my $k (keys %EXPORT_TAGS) {
 
 our @EXPORT_OK = keys %EXPORT_OK;
 
-$EXPORT_TAGS{ all } = [@EXPORT_OK];
+$EXPORT_TAGS{ all } = [ @EXPORT_OK ];
 
 our $DIE_ON_ERROR = 0;
 our $PROMOTE_N32 = 1;
 our $REPAIR_V3_FORMAT = 0;
 our $WARN_ON_REPAIR = 1;
 
-our $VERSION = '4.002';
+our $VERSION = '4.003';
 
 our $fourish = qr/^(?:::ffff:0:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
 our $broken_fourish = qr/^::ffff:(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
@@ -578,7 +578,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 4.002
+Version 4.003
 
 =head1 SYNOPSIS
 
@@ -786,9 +786,9 @@ Creates an IPv6 object from 4 unsigned 32-bit network-order integers, supplied i
 
 =item An existing Net::IPAddress::Util object (equivalently, call as an object method)
 
-Creates a non-distructive clone of the object.
+Creates a non-destructive clone of the object.
 
-=item A well-formed IPv4 or IPv6 string (including "IPv4 in IPv6" notation)
+=item A well-formed IPv4 or IPv6 string (including SIIT "IPv4 in IPv6" notation)
 
 Examples are C<1.2.3.4>, C<::ffff:0:1.2.3.4>, C<1:2::3:4>. Note that for IPv6
 flavor strings, the scope ID (if any) is silently discarded. Note also that this
@@ -844,7 +844,11 @@ object representing the same IPv4 address.
 =head1 OVERLOADS
 
 This module overloads a number of operators (cmp, E<lt>=E<gt>, &, |, ~,
-+, -, E<lt>E<lt>, E<gt>E<gt>) in hopefully obvious ways.
++, -, E<lt>E<lt>, E<gt>E<gt>) in hopefully obvious ways. One perhaps non-obvious
+overload is that cmp performs apparently "numeric" order comparison (the same as
+E<lt>=E<gt>) instead of strict string comparison. To understand why, picture it
+as comparing the C<normal_form> of the addresses stringwise (rather than the
+C<as_str> form).
 
 =head1 OBJECT METHODS
 
@@ -908,10 +912,19 @@ else it stringifies to the result of C<ipv6>.
 
 =head1 INTERNAL FUNCTIONS
 
-=head2 ERROR
+=over
+
+=item ERROR
 
 Either confess()es or cluck()s the passed string based on the value of
 $Net::IPAddress::Util::DIE_ON_ERROR, and if possible returns undef.
+
+=back
+
+=head1 TODO
+
+What is the correct thing to do when C<new> is given a flat 16-character string
+with its Unicode flag set?
 
 =head1 LICENSE
 

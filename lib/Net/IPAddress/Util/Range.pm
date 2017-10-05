@@ -13,7 +13,7 @@ use overload (
 use Net::IPAddress::Util qw( :constr :manip );
 require Net::IPAddress::Util::Collection;
 
-our $VERSION = '4.002';
+our $VERSION = '4.003';
 
 sub new {
   my $class = shift;
@@ -182,7 +182,7 @@ Net::IPAddress::Util::Range - Representation of a range of IP addresses
 
 =head1 VERSION
 
-Version 4.002
+Version 4.003
 
 =head1 SYNOPSIS
 

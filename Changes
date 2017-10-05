@@ -1,5 +1,8 @@
 Revision history for Net-IPAddress-Util
 
+4.003   2017-10-05
+        Fix ::Tie so that it actually does what the POD says it does.
+
 4.002   2017-10-04
         Add "repair" functionality to upgrade v3.x data to v4.x format.
 
