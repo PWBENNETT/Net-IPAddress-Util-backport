@@ -45,9 +45,9 @@ our $PROMOTE_N32 = 1;
 our $REPAIR_V3_FORMAT = 0;
 our $WARN_ON_REPAIR = 1;
 
-our $VERSION = '4.003';
+our $VERSION = '4.004';
 
-our $fourish = qr/^(?:::ffff:0:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
+our $fourish = qr/^(?:::ffff:0+:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
 our $broken_fourish = qr/^::ffff:(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
 our $numberish = qr/^\d+$/o;
 our $normalish = qr/^([0-9a-f]{32})$/io;
@@ -56,15 +56,16 @@ our $sixish = qr/^([0-9a-f:]+)(?:\%.*)?$/io;
 sub _repair_v3_format {
   my ($old) = @_;
   if (
-    $old->[ 8 ] == 0
-    && $old->[ 9 ] == 0
+    !(grep { $_ } @$old[ 0 .. 9 ])
     && $old->[ 10 ] == 0xff
     && $old->[ 11 ] == 0xff
   ) {
     if ($WARN_ON_REPAIR > 1) {
+      local $Carp::Internal{ (__PACKAGE__) };
       cluck('Repairing v3.x module data to v4.x data');
     }
     elsif ($WARN_ON_REPAIR) {
+      local $Carp::Internal{ (__PACKAGE__) };
       carp('Repairing v3.x module data to v4.x data');
     }
     $old->[ 8 ] = 0xff;
@@ -107,9 +108,11 @@ sub new {
   }
   elsif ($REPAIR_V3_FORMAT && $address =~ $broken_fourish) {
     if ($WARN_ON_REPAIR > 1) {
+      local $Carp::Internal{ (__PACKAGE__) };
       cluck('Repairing v3.x module data to v4.x data');
     }
     elsif ($WARN_ON_REPAIR) {
+      local $Carp::Internal{ (__PACKAGE__) };
       carp('Repairing v3.x module data to v4.x data');
     }
     $normal = [
@@ -578,7 +581,7 @@ Net::IPAddress::Util - Version-agnostic representation of an IP address
 
 =head1 VERSION
 
-Version 4.003
+Version 4.004
 
 =head1 SYNOPSIS
 
