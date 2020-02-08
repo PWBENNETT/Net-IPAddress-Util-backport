@@ -45,7 +45,12 @@ our $PROMOTE_N32 = 1;
 our $REPAIR_V3_FORMAT = 0;
 our $WARN_ON_REPAIR = 1;
 
-our $VERSION = '4.004';
+our @SIIT = (
+  [ 0, 0, 0xff, 0xff ], # off
+  [ 0xff, 0xff, 0, 0 ], # on
+);
+
+our $VERSION = '5.000';
 
 our $fourish = qr/^(?:::ffff:0+:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
 our $broken_fourish = qr/^::ffff:(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
@@ -53,25 +58,22 @@ our $numberish = qr/^\d+$/o;
 our $normalish = qr/^([0-9a-f]{32})$/io;
 our $sixish = qr/^([0-9a-f:]+)(?:\%.*)?$/io;
 
-sub _repair_v3_format {
-  my ($old) = @_;
+sub SIIT {
+  my $self = shift;
+  my ($do) = @_;
+  $do //= 1;
+  $self->{ address } = pack 'C16', _enable_SIIT(unpack 'C16', $self->{ address });
+  $self->{ SIIT } = $do;
+  return $self;
+}
+
+sub _set_SIIT {
+  my ($old, $do) = @_;
   if (
-    !(grep { $_ } @$old[ 0 .. 9 ])
-    && $old->[ 10 ] == 0xff
-    && $old->[ 11 ] == 0xff
+    !(grep { $_ } @$old[ 0 .. 7 ])
+    && (grep { @{$old->[ $_ ]} == $SIIT[!!$do]->[ $_ ] } (8 .. 11)) == 4
   ) {
-    if ($WARN_ON_REPAIR > 1) {
-      local $Carp::Internal{ (__PACKAGE__) };
-      cluck('Repairing v3.x module data to v4.x data');
-    }
-    elsif ($WARN_ON_REPAIR) {
-      local $Carp::Internal{ (__PACKAGE__) };
-      carp('Repairing v3.x module data to v4.x data');
-    }
-    $old->[ 8 ] = 0xff;
-    $old->[ 9 ] = 0xff;
-    $old->[ 10 ] = 0;
-    $old->[ 11 ] = 0;
+    $old->[ $_ ] = @SIIT[!$do]->[ $_ ] for (8 .. 11);
   }
   return $old;
 }
@@ -83,7 +85,9 @@ sub IP {
 sub new {
   my $self = shift;
   my $class = ref($self) || $self;
-  my ($address) = @_;
+  my ($address, %opt) = @_;
+  my @siit_prefix = @{$SIIT[$opt{ SIIT } // 0]};
+  my $promote = $opt{ promote } // $PROMOTE_N32;
   unless (defined $address) {
     return ERROR("Invalid argument undef() provided");
   }
@@ -102,31 +106,19 @@ sub new {
     $normal = [
       0, 0, 0, 0,
       0, 0, 0, 0,
-      0xff, 0xff, 0, 0,
+      @siit_prefix,
       $1, $2, $3, $4
     ];
   }
-  elsif ($REPAIR_V3_FORMAT && $address =~ $broken_fourish) {
-    if ($WARN_ON_REPAIR > 1) {
-      local $Carp::Internal{ (__PACKAGE__) };
-      cluck('Repairing v3.x module data to v4.x data');
-    }
-    elsif ($WARN_ON_REPAIR) {
-      local $Carp::Internal{ (__PACKAGE__) };
-      carp('Repairing v3.x module data to v4.x data');
-    }
+  elsif (
+    $opt{ promote }
+    and $address =~ $numberish
+    and 0 <= $address && $address <= (2 ** 32) - 1
+  ) {
     $normal = [
       0, 0, 0, 0,
       0, 0, 0, 0,
-      0xff, 0xff, 0, 0,
-      $1, $2, $3, $4
-    ];
-  }
-  elsif ($PROMOTE_N32 and $address =~ $numberish and $address >= 0 and $address <= (2 ** 32) - 1) {
-    $normal = [
-      0, 0, 0, 0,
-      0, 0, 0, 0,
-      0xff, 0xff, 0, 0,
+      @siit_prefix,
       unpack('C4', pack('N', $address))
     ];
   }
@@ -184,20 +176,15 @@ sub new {
   else {
     return ERROR("Invalid argument `$address', a(n) " . (ref($address) || 'bare scalar') . ' provided');
   }
-  if ($REPAIR_V3_FORMAT) {
-    $normal = _repair_v3_format($normal);
-  }
-  return bless { address => pack('C16', @$normal) } => $class;
+  return bless { address => pack('C16', @$normal), %opt } => $class;
 }
 
 sub is_ipv4 {
   my $self = shift;
   my @octets = unpack 'C16', $self->{ address };
+  my $is_siit = $self->{ SIIT } || 0;
   return
-    $octets[ 8 ] == 0xff
-    && $octets[ 9 ] == 0xff
-    && $octets[ 10 ] == 0
-    && $octets[ 11 ] == 0
+    (grep { $octets[ $_ ] eq $SIIT[$is_siit]->[ $_ - 8 ]} (8 .. 11)) == 4
     && (!grep { $_ } @octets[ 0 .. 7 ]);
 }
 
@@ -216,7 +203,7 @@ sub as_n128 {
   my ($keep) = @_;
   my $rv;
   {
-    eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
+    require 'Math/BigInt.pm' or return ERROR("Could not load Math::BigInt: $@");
     my $accum = Math::BigInt->new('0');
     my $factor = Math::BigInt->new('1')->blsft(Math::BigInt->new('32'));
     for my $i (map { $_ * 4 } 0 .. 3) {
@@ -308,8 +295,10 @@ sub _do_add {
     }
     push @rv, $answer;
   }
+  my %opt;
+  @opt{qw( SIIT promote )} = @$self{qw( SIIT promote )};
   @rv = $self->_mask_out($pow, $mask, reverse @rv);
-  my $retval = Net::IPAddress::Util->new(\@rv);
+  my $retval = Net::IPAddress::Util->new(\@rv, %opt);
   return $retval;
 }
 
@@ -333,8 +322,10 @@ sub _do_subtract {
     }
     push @rv, $answer;
   }
+  my %opt;
+  @opt{qw( SIIT promote )} = @$self{qw( SIIT promote )};
   @rv = $self->_mask_out($pow, $mask, reverse @rv);
-  my $retval = Net::IPAddress::Util->new(\@rv);
+  my $retval = Net::IPAddress::Util->new(\@rv, %opt);
   return $retval;
 }
 
@@ -427,7 +418,7 @@ sub _pow_mask {
     $mask = pack('C16',
       0, 0, 0, 0,
       0, 0, 0, 0,
-      0xff, 0xff, 0, 0,
+      @{$SIIT[ $self->{ SIIT } ]},
       0, 0, 0, 0,
     );
   }

@@ -1,10 +1,9 @@
 #!/usr/bin/env perl
 
+use strict;
+use warnings;
+
 BEGIN {
-  if ($] ge '5.012') {
-    use strict;
-    use warnings;
-  }
   if ($] ge '5.026') {
     use lib '.';
   }
