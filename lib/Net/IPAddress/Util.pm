@@ -52,8 +52,8 @@ our @SIIT = (
 
 our $VERSION = '5.000';
 
-our $fourish = qr/^(?:::ffff:0+:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
-our $broken_fourish = qr/^::ffff:(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
+our $siit_fourish = qr/^(?:::ffff:0+:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
+our $fourish = qr/^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
 our $numberish = qr/^\d+$/o;
 our $normalish = qr/^([0-9a-f]{32})$/io;
 our $sixish = qr/^([0-9a-f:]+)(?:\%.*)?$/io;
@@ -62,19 +62,21 @@ sub SIIT {
   my $self = shift;
   my ($do) = @_;
   $do //= 1;
-  $self->{ address } = pack 'C16', _enable_SIIT(unpack 'C16', $self->{ address });
+  $self = _set_SIIT($self, $do);
   $self->{ SIIT } = $do;
   return $self;
 }
 
 sub _set_SIIT {
   my ($old, $do) = @_;
+  my $normal = [ unpack('C16', $old->{ address }) ];
   if (
-    !(grep { $_ } @$old[ 0 .. 7 ])
-    && (grep { @{$old->[ $_ ]} == $SIIT[!!$do]->[ $_ ] } (8 .. 11)) == 4
+    !(grep { $_ } $normal->[ 0 .. 7 ])
+    && (grep { $normal->[ $_ ] == $SIIT[!!$do]->[ $_ ] } (8 .. 11)) == 4
   ) {
-    $old->[ $_ ] = @SIIT[!$do]->[ $_ ] for (8 .. 11);
+    $normal->[ $_ ] = $SIIT[!$do]->[ $_ ] for (8 .. 11);
   }
+  $old->{ address } = pack('C16', @$normal);
   return $old;
 }
 
@@ -88,10 +90,15 @@ sub new {
   my ($address, %opt) = @_;
   my @siit_prefix = @{$SIIT[$opt{ SIIT } // 0]};
   my $promote = $opt{ promote } // $PROMOTE_N32;
-  unless (defined $address) {
-    return ERROR("Invalid argument undef() provided");
-  }
   my $normal = [ ];
+  if (!defined $address) {
+    $normal = [
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+      0, 0, 0, 0,
+    ];
+  }
   if (ref($address) eq 'ARRAY' && @$address == 16) {
     $normal = $address;
   }
@@ -203,7 +210,7 @@ sub as_n128 {
   my ($keep) = @_;
   my $rv;
   {
-    require 'Math/BigInt.pm' or return ERROR("Could not load Math::BigInt: $@");
+    eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
     my $accum = Math::BigInt->new('0');
     my $factor = Math::BigInt->new('1')->blsft(Math::BigInt->new('32'));
     for my $i (map { $_ * 4 } 0 .. 3) {
@@ -559,7 +566,7 @@ sub mask {
 sub fqdn {
   carp('Compatibility function fqdn() is deprecated') if $^W;
   my $dn = shift;
-  return split /\./, $dn, 2;
+  return split(/\./, $dn, 2);
 }
 
 1;

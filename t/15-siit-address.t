@@ -18,7 +18,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag('Pure IPv4');
-  my $test = IP('192.168.0.1');
+  my $test = IP('192.168.0.1')->SIIT();
   my $nf = $test->normal_form();
   is($test->str() ,        '192.168.0.1', "Pure IPv4 round-trip via str()");
   is("$test"      ,        '192.168.0.1', "Pure IPv4 round-trip overloaded");
@@ -26,12 +26,12 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   is($test->ipv6(), '::ffff:0:192.168.0.1', "Pure IPv4 round-trip via ipv6()");
   is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 round-trip normal form");
   is($test->as_n32(), '3232235521', "Pure IPv4 round-trip via as_n32()");
-  is($test->as_n128(), '281473913978881', "Pure IPv4 round-trip via as_n128()");
+  is($test->as_n128(), '18446462601965076481', "Pure IPv4 round-trip via as_n128()");
 }
 
 {
   # diag('Pure IPv4 the other way around');
-  my $test = IP('281473913978881');
+  my $test = IP('18446462601965076481')->SIIT();
   my $nf = $test->normal_form();
   is("$test"      ,        '192.168.0.1', "Pure IPv4 the other way around round-trip overloaded");
   is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 the other way around round-trip normal form");
@@ -39,7 +39,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag('IPv4-in-IPv6');
-  my $test = IP('::ffff:192.168.0.1');
+  my $test = IP('::ffff:0:192.168.0.1')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '192.168.0.1', "IPv4-in-IPv6 round-trip");
   is($nf , '00000000000000000000ffffc0a80001', "IPv4-in-IPv6 round-trip normal form");
@@ -47,7 +47,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag('IPv4-as-IPv6');
-  my $test = IP('::ffff:c0a8:1');
+  my $test = IP('::ffff:0:c0a8:1')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '192.168.0.1', "IPv4-as-IPv6 round-trip");
   is($nf , '00000000000000000000ffffc0a80001', "IPv4-as-IPv6 round-trip normal form");
@@ -55,7 +55,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag('Pure IPv6');
-  my $test = IP('12::34');
+  my $test = IP('12::34')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '12::34', "Pure IPv6 round-trip");
   is($nf , '00120000000000000000000000000034', "Pure IPv6 round-trip normal form");
@@ -63,7 +63,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag('Pure IPv6 without a ::');
-  my $test = IP('1:2:3:4:5:6:7:8');
+  my $test = IP('1:2:3:4:5:6:7:8')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '1:2:3:4:5:6:7:8', "Pure IPv6 without a :: round-trip");
   is($nf , '00010002000300040005000600070008', "Pure IPv6 without a :: round-trip normal form");
@@ -71,7 +71,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag('RT 99174');
-  my $test = IP('1:2::3:4');
+  my $test = IP('1:2::3:4')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '1:2::3:4', "RT 99174 round-trip");
   is($nf , '00010002000000000000000000030004', "RT 99174 round-trip normal form");
@@ -79,8 +79,8 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag("Single IPv4 range");
-  my $lower = IP('192.168.0.1');
-  my $upper = IP('192.168.0.1');
+  my $lower = IP('192.168.0.1')->SIIT();
+  my $upper = IP('192.168.0.1')->SIIT();
   my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
   my $bounds = $range->outer_bounds();
   is("$range"              , '(192.168.0.1 .. 192.168.0.1)', "Single IPv4 range");
@@ -92,8 +92,8 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag("Single IPv6 range");
-  my $lower = IP('12::34');
-  my $upper = IP('12::34');
+  my $lower = IP('12::34')->SIIT();
+  my $upper = IP('12::34')->SIIT();
   my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
   my $bounds = $range->outer_bounds();
   is("$range"              , '(12::34 .. 12::34)', "Single IPv6 range");
@@ -105,8 +105,8 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 
 {
   # diag("Large IPv4 range");
-  my $lower = IP('192.168.0.3');
-  my $upper = IP('192.168.0.123');
+  my $lower = IP('192.168.0.3')->SIIT();
+  my $upper = IP('192.168.0.123')->SIIT();
   my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
   my $bounds = $range->outer_bounds();
   is("$range"              , '(192.168.0.3 .. 192.168.0.123)', "Large-range range");
@@ -117,9 +117,9 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 }
 {
   # diag("Large IPv4 collection");
-  my $lower = IP('192.168.0.3');
+  my $lower = IP('192.168.0.3')->SIIT();
   # diag("l`$lower'");
-  my $upper = IP('192.168.0.123');
+  my $upper = IP('192.168.0.123')->SIIT();
   # diag("u`$upper'");
   my $range = Net::IPAddress::Util::Range->new({ lower => $lower, upper => $upper });
   # diag("$range");
@@ -193,7 +193,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
 {
   # diag('PROMOTE_N32');
   local $Net::IPAddress::Util::PROMOTE_N32 = 1;
-  my $ip = IP(3232235521);
+  my $ip = IP(3232235521)->SIIT();
   is("$ip", '192.168.0.1', 'PROMOTE_N32');
   is($ip->as_n32(), 3232235521, 'as_n32()');
 }
