@@ -53,8 +53,8 @@ our @SIIT = (
 our $VERSION = '5.000';
 
 our $siit_fourish = qr/^(?:::ffff:0+:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
-our $fourish = qr/^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
-our $numberish = qr/^\d+$/o;
+our $fourish = qr/^(?:::ffff(?::0+)?:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
+our $numberish = qr/^(\d+)$/o;
 our $normalish = qr/^([0-9a-f]{32})$/io;
 our $sixish = qr/^([0-9a-f:]+)(?:\%.*)?$/io;
 
@@ -71,7 +71,7 @@ sub _set_SIIT {
   my ($old, $do) = @_;
   my $normal = [ unpack('C16', $old->{ address }) ];
   if (
-    !(grep { $_ } $normal->[ 0 .. 7 ])
+    !(grep { $_ } @$normal[ 0 .. 7 ])
     && (grep { $normal->[ $_ ] == $SIIT[!!$do]->[ $_ ] } (8 .. 11)) == 4
   ) {
     $normal->[ $_ ] = $SIIT[!$do]->[ $_ ] for (8 .. 11);
@@ -88,7 +88,7 @@ sub new {
   my $self = shift;
   my $class = ref($self) || $self;
   my ($address, %opt) = @_;
-  my @siit_prefix = @{$SIIT[$opt{ SIIT } // 0]};
+  my @siit_prefix = @{$SIIT[$opt{ SIIT } ||= int($address =~ $siit_fourish)]};
   my $promote = $opt{ promote } // $PROMOTE_N32;
   my $normal = [ ];
   if (!defined $address) {
@@ -183,6 +183,7 @@ sub new {
   else {
     return ERROR("Invalid argument `$address', a(n) " . (ref($address) || 'bare scalar') . ' provided');
   }
+  # warn(join(',', @$normal) . "\n");
   return bless { address => pack('C16', @$normal), %opt } => $class;
 }
 

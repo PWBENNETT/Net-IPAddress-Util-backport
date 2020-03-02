@@ -24,7 +24,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   is("$test"      ,        '192.168.0.1', "Pure IPv4 round-trip overloaded");
   is($test->ipv4(),        '192.168.0.1', "Pure IPv4 round-trip via ipv4()");
   is($test->ipv6(), '::ffff:0:192.168.0.1', "Pure IPv4 round-trip via ipv6()");
-  is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 round-trip normal form");
+  is($nf          , '0000000000000000ffff0000c0a80001', "Pure IPv4 round-trip normal form");
   is($test->as_n32(), '3232235521', "Pure IPv4 round-trip via as_n32()");
   is($test->as_n128(), '18446462601965076481', "Pure IPv4 round-trip via as_n128()");
 }
@@ -34,7 +34,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   my $test = IP('18446462601965076481')->SIIT();
   my $nf = $test->normal_form();
   is("$test"      ,        '192.168.0.1', "Pure IPv4 the other way around round-trip overloaded");
-  is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 the other way around round-trip normal form");
+  is($nf          , '0000000000000000ffff0000c0a80001', "Pure IPv4 the other way around round-trip normal form");
 }
 
 {
@@ -42,7 +42,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   my $test = IP('::ffff:0:192.168.0.1')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '192.168.0.1', "IPv4-in-IPv6 round-trip");
-  is($nf , '00000000000000000000ffffc0a80001', "IPv4-in-IPv6 round-trip normal form");
+  is($nf , '0000000000000000ffff0000c0a80001', "IPv4-in-IPv6 round-trip normal form");
 }
 
 {
@@ -50,7 +50,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   my $test = IP('::ffff:0:c0a8:1')->SIIT();
   my $nf = $test->normal_form();
   is("$test" , '192.168.0.1', "IPv4-as-IPv6 round-trip");
-  is($nf , '00000000000000000000ffffc0a80001', "IPv4-as-IPv6 round-trip normal form");
+  is($nf , '0000000000000000ffff0000c0a80001', "IPv4-as-IPv6 round-trip normal form");
 }
 
 {

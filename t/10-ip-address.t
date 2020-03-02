@@ -23,7 +23,7 @@ $Net::IPAddress::Util::PROMOTE_N32 = 0;
   is($test->str() ,        '192.168.0.1', "Pure IPv4 round-trip via str()");
   is("$test"      ,        '192.168.0.1', "Pure IPv4 round-trip overloaded");
   is($test->ipv4(),        '192.168.0.1', "Pure IPv4 round-trip via ipv4()");
-  is($test->ipv6(), '::ffff:0:192.168.0.1', "Pure IPv4 round-trip via ipv6()");
+  is($test->ipv6(), '::ffff:192.168.0.1', "Pure IPv4 round-trip via ipv6()");
   is($nf          , '00000000000000000000ffffc0a80001', "Pure IPv4 round-trip normal form");
   is($test->as_n32(), '3232235521', "Pure IPv4 round-trip via as_n32()");
   is($test->as_n128(), '281473913978881', "Pure IPv4 round-trip via as_n128()");
