@@ -1,8 +1,6 @@
 package Net::IPAddress::Util;
 
-use strict;
-use warnings;
-use 5.010;
+use 5.012;
 
 use overload (
   '=' => 'new',
@@ -53,10 +51,33 @@ our @SIIT = (
 our $VERSION = '5.000';
 
 our $siit_fourish = qr/^(?:::ffff:0+:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
-our $fourish = qr/^(?:::ffff(?::0+)?:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
+our $fourish = qr/^(?:::ffff:)?(\d+)\.(\d+)\.(\d+)\.(\d+)$/io;
 our $numberish = qr/^(\d+)$/o;
 our $normalish = qr/^([0-9a-f]{32})$/io;
 our $sixish = qr/^([0-9a-f:]+)(?:\%.*)?$/io;
+
+*__debug
+  = $ENV{ IP_UTIL_DEBUG }
+  ? sub { my ($p, $f, $l) = caller(); warn('@' . " $l: " . join(', ', @_) . "\n"); }
+  : sub { }
+  ;
+
+*__dnorm
+  = $ENV{ IP_UTIL_DEBUG }
+  ? sub {
+    my ($p, $f, $l) = caller();
+    my $n = 0;
+    for my $x (@_) {
+      if (eval { @$x }) {
+        warn($n++ . ' @' . " $l: [" . join(', ', map { sprintf('%x', $_) } @$x) . "]\n");
+      }
+      else {
+        warn($n++ . ' @' . " $l: " . $x . "\n");
+      }
+    }
+  }
+  : sub { }
+  ;
 
 sub SIIT {
   my $self = shift;
@@ -81,14 +102,28 @@ sub _set_SIIT {
 }
 
 sub IP {
-  return Net::IPAddress::Util->new($_[0]);
+  return __PACKAGE__->new(@_);
 }
 
 sub new {
   my $self = shift;
   my $class = ref($self) || $self;
   my ($address, %opt) = @_;
-  my @siit_prefix = @{$SIIT[$opt{ SIIT } ||= int($address =~ $siit_fourish)]};
+  __debug(
+    eval { @$address }
+    ? join(' ', map { sprintf($_ > 255 ? '0x%08x' : '%3s', $_ ) } @$address)
+    : $address
+  );
+  my @siit_prefix = @{$SIIT[$opt{ SIIT }
+    ||= (
+      !ref($address)
+      and
+      $address =~ $siit_fourish
+      and
+      $address !~ $fourish
+    )
+  ]};
+  __debug('is ' . ($opt{ SIIT } ? 'not ' : '') . 'SIIT looking');
   my $promote = $opt{ promote } // $PROMOTE_N32;
   my $normal = [ ];
   if (!defined $address) {
@@ -98,23 +133,31 @@ sub new {
       0, 0, 0, 0,
       0, 0, 0, 0,
     ];
+    __dnorm($normal);
   }
   if (ref($address) eq 'ARRAY' && @$address == 16) {
+    __debug('16 element array');
     $normal = $address;
+    __dnorm($normal);
   }
   elsif (ref($address) eq 'ARRAY' && @$address == 4) {
-    # FIXME Principal of least surprise here? Should feeding in 4 values make an IPv4?
+    # FIXME: Principal of least surprise here? Should feeding in 4 values make an IPv4?
+    __debug('4 element array');
     $normal = [ unpack 'C16', pack 'N4', @$address ];
+    __dnorm($normal);
   }
   elsif (ref $address and eval { $address->isa(__PACKAGE__) }) {
     $normal = [ unpack 'C16', $address->{ address } ];
   }
-  elsif ($address =~ $fourish) {
+  elsif ($address =~ $fourish || $address =~ $siit_fourish) {
+    my @addr = ($1, $2, $3, $4);
+    # FIXME: Why can't we do this all on one line?
+    @addr = map { $_ =~ /^0/ ? oct($_) : int($_) } @addr;
     $normal = [
       0, 0, 0, 0,
       0, 0, 0, 0,
       @siit_prefix,
-      $1, $2, $3, $4
+      @addr
     ];
   }
   elsif (
@@ -190,10 +233,10 @@ sub new {
 sub is_ipv4 {
   my $self = shift;
   my @octets = unpack 'C16', $self->{ address };
-  my $is_siit = $self->{ SIIT } || 0;
-  return
-    (grep { $octets[ $_ ] eq $SIIT[$is_siit]->[ $_ - 8 ]} (8 .. 11)) == 4
-    && (!grep { $_ } @octets[ 0 .. 7 ]);
+  __debug(join(' ', map { sprintf('%3s', $_) } @octets));
+  # my $is_siit = $self->{ SIIT } || 0;
+  return 0 if grep { $_ } @octets[ 0 .. 7 ];
+  return 1;
 }
 
 sub ipv4 {
@@ -212,12 +255,7 @@ sub as_n128 {
   my $rv;
   {
     eval "require Math::BigInt" or return ERROR("Could not load Math::BigInt: $@");
-    my $accum = Math::BigInt->new('0');
-    my $factor = Math::BigInt->new('1')->blsft(Math::BigInt->new('32'));
-    for my $i (map { $_ * 4 } 0 .. 3) {
-      $accum->bmul($factor);
-      $accum->badd(Math::BigInt->new('' . unpack 'N', substr($self->{ address }, $i, 4)));
-    }
+    my $accum = Math::BigInt->new(hex($self->normal_form));
     eval "no Math::BigInt" unless $keep;
     $rv = $keep ? $accum : "$accum";
   }
@@ -226,7 +264,9 @@ sub as_n128 {
 
 sub normal_form {
   my $self = shift;
-  my $hex = join('', map { sprintf('%02x', $_) } unpack('C16', $self->{ address }));
+  my @addr = unpack('C16', $self->{ address });
+  splice(@addr, 8, 4, @{$SIIT[$self->{ SIIT }]}) if $self->is_ipv4;
+  my $hex = join('', map { sprintf('%02x', $_) } @addr);
   $hex = substr(('0' x 32) . $hex, -32);
   return lc $hex;
 }
@@ -245,7 +285,10 @@ sub ipv6_expanded {
 sub ipv6 {
   my $self = shift;
   if ($self->is_ipv4()) {
-    return '::ffff:0:'.$self->ipv4();
+    return $self->{ SIIT }
+      ? '::ffff:0:' . $self->ipv4()
+      : '::ffff:' . $self->ipv4()
+      ;
   }
   my $iv = $self->ipv6_expanded();
   my $rv = join(':', map { (my $x = $_) =~ s/^0+//; $x ||= '0'; $x } split ':', $iv);

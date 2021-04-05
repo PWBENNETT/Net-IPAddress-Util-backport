@@ -39,7 +39,7 @@ SKIP: {
     ($old_hn, $old_dn) = Net::IPAddress::fqdn($std_fqdn);
   }
 
-  diag('Some deprecation warnings here are normal') if $^W;
+diag('Some deprecation warnings here are normal') if $^W;
 
   {
     eval "require Net::IPAddress::Util";

@@ -2,7 +2,7 @@ package Net::IPAddress::Util::Collection;
 
 use strict;
 use warnings;
-use 5.010;
+use 5.012;
 
 require Net::IPAddress::Util;
 require Net::IPAddress::Util::Collection::Tie;
